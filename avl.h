@@ -61,7 +61,7 @@ public:
     }
 private:
 
-    //para la altura de los nodos
+    //altura de los nodos
     long height(long pos_node){
         ifstream file(filename, ios::binary);
         Record record;
@@ -75,7 +75,7 @@ private:
         }
     }
 
-    // para sacar el factor de balanceo
+    // factor de balanceo
 
     int balancing_factor(long pos_node){
         ifstream file(filename, ios::binary);
@@ -90,7 +90,7 @@ private:
         }
     }
 
-    // para la actualización de la altura por cada nodo
+    // actualización de la altura por cada nodo
     void update_height(long pos_node){
         ifstream file(filename, ios::binary);
         Record record;
