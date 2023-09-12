@@ -163,14 +163,14 @@ private:
 
     }
 
+    //complete
+
     template <class T>
     void remove(long pos_node, T key, fstream& file){
         if(pos_node == -1)
             return;
-
         Record curr_record;
-        long curr_pos = pos_node;
-        file.seekg(curr_pos, ios::beg);
+        file.seekg(pos_node, ios::beg);
         file.read((char*)&curr_record, sizeof(Record));
 
         if(key < curr_record.cod)
@@ -178,8 +178,47 @@ private:
         else if(key > curr_record.cod)
             remove(curr_record.right, key, file);
         else{
+            if(curr_record.left == -1 && curr_record.right == -1){
+                curr_record.cod = -1;
+                file.seekp(pos_node, ios::beg);
+                file.write((char*)&curr_record, sizeof(Record));
+            }
+            else if(curr_record.left == -1){
+                Record right_record;
+                file.seekg(curr_record.right, ios::beg);
+                file.read((char*)&right_record, sizeof(Record));
+                curr_record.cod = right_record.cod;
+                curr_record.right = right_record.right;
+                curr_record.left = right_record.left;
+                file.seekp(pos_node, ios::beg);
+                file.write((char*)&curr_record, sizeof(Record));
+            }
+            else if(curr_record.right == -1){
+                Record left_record;
+                file.seekg(curr_record.left, ios::beg);
+                file.read((char*)&left_record, sizeof(Record));
+                curr_record.cod = left_record.cod;
+                curr_record.right = left_record.right;
+                curr_record.left = left_record.left;
+                file.seekp(pos_node, ios::beg);
+                file.write((char*)&curr_record, sizeof(Record));
+            }
+            else{
+                Record left_record;
+                file.seekg(curr_record.left, ios::beg);
+                file.read((char*)&left_record, sizeof(Record));
+                curr_record.cod = left_record.cod;
+                curr_record.right = left_record.right;
+                curr_record.left = left_record.left;
+                file.seekp(pos_node, ios::beg);
+                file.write((char*)&curr_record, sizeof(Record));
+                remove(curr_record.left, left_record.cod, file);
 
+            }
         }
+        updateHeight(pos_node, file);
+        balance(pos_node, file);
+
     }
 
     /// AVL
