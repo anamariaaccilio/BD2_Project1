@@ -210,7 +210,7 @@ En este proyecto, utilizamos esta técnica para guardar datos de manera simple y
             rebuild();
         }
 
-    }
+      }
       ```
   2. remove_(const string& key): Elimina un registro del archivo de datos. Realiza una búsqueda binaria para encontrar la posición del registro y marca su puntero como -1 para indicar que está eliminado. Luego, realiza una reconstrucción del archivo de datos para eliminar los registros marcados como eliminados.
      ```cpp
@@ -277,7 +277,7 @@ En este proyecto, utilizamos esta técnica para guardar datos de manera simple y
          - Tomar en cuenta que se tiene que modificar el rebuild para que si lee un -1 en un registro_datafile,
            que no lo agregue al nuevo datafile
          */
-    };
+      };
 
      ```
   3. search(const string& key): Busca registros por su nombre en el archivo de datos y el archivo auxiliar y devuelve una lista de registros que coinciden con el nombre proporcionado.
@@ -359,7 +359,7 @@ En este proyecto, utilizamos esta técnica para guardar datos de manera simple y
         }
 
 
-    }
+      }
       ```
   4. rangeSearch(const string& begin, const string& end): Realiza una búsqueda de rango en el archivo de datos y devuelve registros cuyos nombres estén en el rango especificado.
      ```cpp
@@ -443,7 +443,7 @@ En este proyecto, utilizamos esta técnica para guardar datos de manera simple y
 
         return result;
 
-    }
+      }
 
      ```
   5. rebuild(): Este método se utiliza para reconstruir el archivo de datos principal. Elimina registros marcados como eliminados y reorganiza los registros válidos.
@@ -517,7 +517,7 @@ En este proyecto, utilizamos esta técnica para guardar datos de manera simple y
         data_size += (aux_size - cantidad_eliminados);
         aux_size = 0;
 
-    }
+      }
 
       ```
   6. size(string _file): Calcula y devuelve la cantidad de registros en un archivo específico.
@@ -541,7 +541,7 @@ En este proyecto, utilizamos esta técnica para guardar datos de manera simple y
         } else {
             return "Data";
         }
-    }
+      }
 
       ```
   8. binarySearchPosition(const Record& nuevoRecord): Realiza una búsqueda binaria en el archivo de datos para encontrar la posición en la que debería insertarse un nuevo registro en orden alfabético. Si el registro ya existe, devuelve la posición actual del registro encontrado.
@@ -602,7 +602,7 @@ En este proyecto, utilizamos esta técnica para guardar datos de manera simple y
 
 
         return left;
-    }
+      }
 
       ```
   9. scanAll(string _file): Lee todos los registros de un archivo específico y los devuelve en un vector de registros.
@@ -622,7 +622,7 @@ En este proyecto, utilizamos esta técnica para guardar datos de manera simple y
         file.close();
 
         return records;
-    }
+      }
 
       ```
 
@@ -705,7 +705,7 @@ En las operaciones de eliminación en un archivo AVLFile, se localiza el nodo qu
         updateHeight(pos_node, file);
         balance(pos_node, file);
 
-     }
+       }
      ```
   3. void remove(T key): Elimina un registro del árbol AVL según una clave dada.
      ```cpp
