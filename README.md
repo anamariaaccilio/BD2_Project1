@@ -657,8 +657,11 @@ La implementación del parser para consultas SQL se ha llevado a cabo siguiendo 
 | 1000    | 1702 ms   | Celda 2,3    | Celda 1,3    |
 | 10000    | 97575 ms    | Celda 3,3    | Celda 1,3    |
 | 100000    | 257345 ms   | Celda 3,3    | Celda 1,3    |
+
 # Interfaz gráfica
+
 # Conclusiones
+
 # Team - Group 5
 | <a href="https://github.com/anaaccilio2004" target="_blank">**Ana Maria Accilio Villanueva**</a> | <a href="https://github.com/Diegospf12" target="_blank">**Diego Pacheco Ferrel**</a> | <a href="https://github.com/juanpedrovv" target="_blank">**Juan Pedro Vasquez Vilchez**</a> | <a href="https://github.com/LuisEnriqueCortijoGonzales" target="_blank">**Luis Enrique Cortijo Gonzales**</a> | <a href="https://github.com/marceloZS" target="_blank">**Marcelo Mario Zuloeta Salazar**</a> |
 | :----------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------: |
