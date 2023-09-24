@@ -626,3 +626,34 @@ Finalmente, iteramos por arriba de la cota inferior y por abajo de la cota super
 
           }
 ```
+
+
+## Funciones implementadas
+## Análsis Comparativo 
+## SQL Parser
+La implementación del parser para consultas SQL se ha llevado a cabo siguiendo un enfoque modular y escalable. En primer lugar, hemos desarrollado un scanner que se encarga de tokenizar los lexemas de una cadena de consulta SQL. Este scanner analiza la entrada de texto y divide la consulta en tokens significativos, como palabras clave **(SELECT, INSERT, DELETE, CREATE)**, identificadores **(Campos o ID's)**, operadores y valores. Una vez que tenemos estos tokens el parser se encarga de analizar secuencialmente estos tokens, siguiendo las reglas sintácticas del lenguaje SQL en base a la diferentes tipos de consultas que se quieren hacer. A medida que avanza, verifica la estructura y la coherencia de las consultas, asegurándose de que cumplan con la sintaxis requerida, por ejemplo, si se quiere hacer un **SELECT**, se le va pidiendo al scanner los siguientes tokens y con una funcion verificamos si es el token esperado para poder continuar, si todo es correcto se ejecutan las consultas.
+### Consultas
+# Gráfico comparativo de las técnicas de indexación
+# Resultados experimentales
+## Inserción
+### Tiempo de ejecución
+| #Registros | AVL File | Sequential File | Extendible Hashing |
+|--------------|--------------|--------------|--------------|
+| 100   | 70 ms    | Celda 1,3    | Celda 1,3    |
+| 1000    | 1702 ms   | Celda 2,3    | Celda 1,3    |
+| 10000    | 97575 ms    | Celda 3,3    | Celda 1,3    |
+| 100000    | 257345 ms   | Celda 3,3    | Celda 1,3    |
+## Busqueda
+| #Registros | AVL File | Sequential File | Extendible Hashing |
+|--------------|--------------|--------------|--------------|
+| 100   | 70 ms    | Celda 1,3    | Celda 1,3    |
+| 1000    | 1702 ms   | Celda 2,3    | Celda 1,3    |
+| 10000    | 97575 ms    | Celda 3,3    | Celda 1,3    |
+| 100000    | 257345 ms   | Celda 3,3    | Celda 1,3    |
+# Interfaz gráfica
+# Conclusiones
+# Team - Group 5
+| <a href="https://github.com/anaaccilio2004" target="_blank">**Ana Maria Accilio Villanueva**</a> | <a href="https://github.com/Diegospf12" target="_blank">**Diego Pacheco Ferrel**</a> | <a href="https://github.com/juanpedrovv" target="_blank">**Juan Pedro Vasquez Vilchez**</a> | <a href="https://github.com/LuisEnriqueCortijoGonzales" target="_blank">**Luis Enrique Cortijo Gonzales**</a> | <a href="https://github.com/marceloZS" target="_blank">**Marcelo Mario Zuloeta Salazar**</a> |
+| :----------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------: |
+| <img src="https://avatars.githubusercontent.com/u/91237434?v=4" alt="drawing" width="200"/> | <img src="https://avatars.githubusercontent.com/u/94090499?v=4" alt="drawing" width="200"/> | <img src="https://avatars.githubusercontent.com/u/83739305?v=4" alt="drawing" width="200"/> | <img src="https://avatars.githubusercontent.com/u/84096868?v=4" alt="drawing" width="200"/> | <img src="https://avatars.githubusercontent.com/u/85197213?v=4" alt="drawing" width="200"/> |
+# Referencias bibliográficas
