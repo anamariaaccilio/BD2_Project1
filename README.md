@@ -23,9 +23,9 @@ Se busca obtener una optimización significativa de los tiempos de inserción y 
 ## Sequential File Organization
 La técnica de organización de archivos llamada Sequential File es una forma de organizar y almacenar datos en un archivo, donde los registros se almacenan en secuencia, uno tras otro. Es como una lista de elementos, donde cada elemento tiene un número de posición. En este tipo de archivo, los registros están en un orden específico y se pueden acceder uno tras otro, desde el principio hasta el final, sin saltos.
 
-![SequentialFile]/sequential1.png
+![sequential](https://github.com/anamariaaccilio/BD2_Project1/blob/main/sequential1.png)
 
-![SequentialFile]/sequential2.png
+![SequentialFile](https://github.com/anamariaaccilio/BD2_Project1/blob/main/sequential2.png)
 
 En este proyecto, utilizamos esta técnica para guardar datos de manera simple y eficiente. Es útil cuando no se necesita un acceso aleatorio a los datos y cuando la prioridad es la simplicidad y la eficiencia en la lectura y escritura de registros en orden.
 
@@ -633,7 +633,7 @@ La técnica de organización de archivos AVL File se utiliza en situaciones en l
 
 En las operaciones de eliminación en un archivo AVLFile, se localiza el nodo que contiene el registro a eliminar y se efectúan rotaciones para mantener el equilibrio y la altura adecuada en el árbol. La eliminación física del elemento en el archivo se pospone hasta que se realice un rebuild.
 
-![avl]/avl.png
+![AVL](https://github.com/anamariaaccilio/BD2_Project1/blob/main/avl.png)
 
 - *Métodos importantes*
   1. Record find: Busca un registro en el árbol AVL según una clave dada.
