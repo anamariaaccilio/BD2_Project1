@@ -1,6 +1,4 @@
-# Organización de Archivos
-
-
+# Proyecto 1 BD2 - Organización de Archivos 
 
 
 <a name="readme-top"></a>
@@ -44,9 +42,9 @@
 
 <hr>
 
-
-
 # Introducción
+En este proyecto, implementaremos y manipularemos técnicas de organización de archivos en memoria secundaria, conjuntamente con un parser de código SQL para ejecutar sentencias.
+
 ## Objetivo del proyecto
 
 ### Principal
