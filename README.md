@@ -356,10 +356,10 @@ En este proyecto, utilizamos esta técnica para guardar datos de manera simple y
 
             return result;
 
-        }
+          }
 
 
-        }
+          }
       ```
   4. rangeSearch(const string& begin, const string& end): Realiza una búsqueda de rango en el archivo de datos y devuelve registros cuyos nombres estén en el rango especificado.
      ```cpp
@@ -443,7 +443,7 @@ En este proyecto, utilizamos esta técnica para guardar datos de manera simple y
 
         return result;
 
-        }
+          }
 
      ```
   5. rebuild(): Este método se utiliza para reconstruir el archivo de datos principal. Elimina registros marcados como eliminados y reorganiza los registros válidos.
@@ -517,7 +517,7 @@ En este proyecto, utilizamos esta técnica para guardar datos de manera simple y
         data_size += (aux_size - cantidad_eliminados);
         aux_size = 0;
 
-      }
+        }
 
       ```
   6. size(string _file): Calcula y devuelve la cantidad de registros en un archivo específico.
@@ -530,7 +530,7 @@ En este proyecto, utilizamos esta técnica para guardar datos de manera simple y
         long total_bytes = file.tellg();//cantidad de bytes del archivo
         file.close();
         return total_bytes / sizeof(Record);
-    }
+        }
       
       ```
   7. analyzeFloat(float number): Determina si un número flotante corresponde a un registro almacenado en el archivo auxiliar o en el archivo de datos principal.
@@ -602,7 +602,7 @@ En este proyecto, utilizamos esta técnica para guardar datos de manera simple y
 
 
         return left;
-      }
+        }
 
       ```
   9. scanAll(string _file): Lee todos los registros de un archivo específico y los devuelve en un vector de registros.
@@ -622,7 +622,7 @@ En este proyecto, utilizamos esta técnica para guardar datos de manera simple y
         file.close();
 
         return records;
-      }
+        }
 
       ```
 
@@ -664,7 +664,7 @@ En las operaciones de eliminación en un archivo AVLFile, se localiza el nodo qu
                 }
             }
         }
-     }
+       }
     
      ```
   2. void insert(Record record): Inserta un nuevo registro en el árbol AVL.
@@ -762,7 +762,7 @@ En las operaciones de eliminación en un archivo AVLFile, se localiza el nodo qu
         updateHeight(pos_node, file);
         balance(pos_node, file);
 
-     }
+       }
      ```
   4. vector<Record> searchRange(int start, int end, int i, vector<struct Record> vector): Busca registros en un rango específico de claves en el árbol AVL.
      ```cpp
@@ -782,7 +782,7 @@ En las operaciones de eliminación en un archivo AVLFile, se localiza el nodo qu
             searchRange(curr_record.right, start, end, result, file);
         else if(curr_record.cod > end)
             searchRange(curr_record.left, start, end, result, file);
-     }
+       }
      ```
 
 ## Extendible Hashing
