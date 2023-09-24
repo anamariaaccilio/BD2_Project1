@@ -73,189 +73,72 @@ La técnica de organización de archivos llamada Sequential File es una forma de
 
 En este proyecto, utilizamos esta técnica para guardar datos de manera simple y eficiente. Es útil cuando no se necesita un acceso aleatorio a los datos y cuando la prioridad es la simplicidad y la eficiencia en la lectura y escritura de registros en orden.
 
-- *Métodos importantes*
-  1. add(Record record): Agrega un nuevo registro al archivo de datos siguiendo una lógica específica. Dependiendo de ciertas condiciones, los registros se pueden agregar al archivo auxiliar o al archivo de datos principal.
-     ```cpp
-      void add(Record record){
-        //Ubicamos el elemento anterior a record
-        int X_pos = binarySearchPosition(record) - 1; //binarySearchPOS me devuelve la pos donde debo insertar el elemento, por eso el -1
-        Record X = readRecord(X_pos,this->data_file);
+#### *Métodos importantes*
 
-        //Si X apunta a un elemento de la misma Data
-        /*
-            add(Manuel)
-            ======================
-            Data:
-            "     " -> 0.1
-            Asucena -> 0.2  <- X
-            Ortega  -> 0
-            ======================
-            Pedro   -> 0.3
-        */
-        if(analyzeFloat(X.Puntero)=="Data"){
-            //Agregamos el record al aux y hacemos el cambiaso de punteros entre X y record
-            record.Puntero = X.Puntero; //record -> X.Puntero
-            writeRecordEND(record, this->aux_file);
-            updatePunteroAtPosition(X_pos, aux_size, this->data_file); // X -> pos(record)
+##### add(Record record): Agrega un nuevo registro al archivo de datos siguiendo una lógica específica. Dependiendo de ciertas condiciones, los registros se pueden agregar al archivo auxiliar o al archivo de datos principal.
+     
+Antes de insertar cualquier elemento en un Sequential File, se debe de tomar en cuenta que directamente nunca se va a escribir un elemento en el archivo data.bin (nuestro archivo principal). Todo elemento nuevo va a ser insertado en el archivo auxiliar.bin (nuestro archivo auxiliar), y cuando auxiliar.bin ya este lleno de registros haremos un rebuild. El rebuild nos permite trasladar todos los elementos pertenecientes a data.bin y a auxiliar.bin de manera ordenada a un nuevo archivo data.bin.
 
-            //No olvidarse de aumentar la cantidad de elementos que hay en el auxiliar.bin
-            aux_size += 1;
-        }
+Si deseamos insertar un elemento “record”, lo primero que debemos hacer es buscar de forma binaria después de que elemento X (perteneciente al data.bin), según su orden alfabético, estaría nuestro record. Cabe recalcar que si se encuentra otro elemento X+n mayor (alfabeticamente) a X y que además “record” va después que X+n (según ASCII) entonces siempre elegiremos a X+n como el nuevo antecesor de “record”, osea el nuevo X.
 
-        //Si X apunta a un elemento perteneciente a Auxiliar
-        /*
-            add(Manuel)
-            ======================
-            Data:
-            "     " -> 0.1
-            Asucena -> 0   <- X
-            Ortega  -> 0.3
-            ======================
-            Auxiliar:
-            Belen   ->  0.2 <- Y
-        */
-        if(analyzeFloat(X.Puntero)=="Auxiliar"){
-            //Si apunta a un auxiliar primero me tengo que ubicar en auxiliarfile[X.Puntero]
+```cpp
+int X_pos = binarySearchPosition(record) - 1; //binarySearchPOS me devuelve la pos donde debo insertar el elemento, por eso el -1
+Record X = readRecord(X_pos,this->data_file);
+```
 
-            //Y_pos = X.Puntero;
-            Record Y = readRecord(X.Puntero,this->aux_file);
+Ahora que identificamos nuestro X (antecesor más próximo a record según ASCII), actuaremos de distinta forma si X apunta a un elemento perteneciente al mismo data.bin ó si apunta a un elemento perteneciente al auxiliar.bin
 
-            //Caso particular (Todavia no nos hemos adentrado al 100% en aux_file, estamos en el limbo)
-            /*
-                add(Baldor)
-                ======================
-                Data:
-                "     " -> 0.1
-                Asucena -> 0   <- X      (X todavia esta en data file, mientras que Y ya esta exclusivamente en el auxiliar file)
-                Ortega  -> 0.3
-                ======================
-                Auxiliar:
-                Belen   ->  0.2 <- Y    (Baldor va antes que que Belen)
-             */
-            int cmp = record.compare(Y);
-            if (cmp <= 0){ //Si record va antes que Y o es igual a Y
-                //Agregamos el record al aux y hacemos el cambiaso de punteros entre X y record
-                record.Puntero = X.Puntero; //record -> X.Puntero
-                writeRecordEND(record, this->aux_file);
-                updatePunteroAtPosition(X_pos, aux_size, this->data_file); // X -> pos(record)
+**Si X apunta a un elemento perteneciente al mismo data.bin** entonces insertaremos a “record” al final del archivo auxiliar.bin. Posteriormente, si X apuntaba a PosY (X → PosY) ahora “record” apuntará a PosY también (record → PosY), y X ahora apuntará a la posición en la que fue insertado “record” en el auxiliar.bin (X→PosRecord).
 
-                //No olvidarse de aumentar la cantidad de elementos que hay en el auxiliar.bin
-                aux_size += 1;
-            }
+```cpp
+   
+   if(analyzeFloat(X.Puntero)=="Data"){
+       //Agregamos el record al aux y hacemos el cambiaso de punteros entre X y record
+       record.Puntero = X.Puntero; //record -> X.Puntero
+       writeRecordEND(record, this->aux_file);
+       updatePunteroAtPosition(X_pos, aux_size, this->data_file); // X -> pos(record)
 
-            //Si record va despues que Y
-            if (cmp > 0){
+       //No olvidarse de aumentar la cantidad de elementos que hay en el auxiliar.bin
+       aux_size += 1;
+   }
+```
 
-                //Caso particular (Todavia no nos hemos adentrado al 100% en aux_file, estamos en el limbo)
-                /*
-                    add(Boris)
-                    ======================
-                    Data:
-                    "     " -> 0.1
-                    Asucena -> 0   <- X      (X todavia esta en data file, mientras que Y ya esta exclusivamente en el auxiliar file)
-                    Ortega  -> 0.3
-                    ======================
-                    Auxiliar:
-                    Belen   ->  0.2 <- Y    (Boris va despues que que Belen, pero despues de Belen no hay nada mas)
-                 */
-                if (analyzeFloat(Y.Puntero) == "Data"){
-                    record.Puntero = Y.Puntero;
-                    writeRecordEND(record, this->aux_file);
-                    updatePunteroAtPosition(X.Puntero, aux_size, this->aux_file); // X -> pos(record)
-                    //No olvidarse de aumentar la cantidad de elementos que hay en el auxiliar.bin
-                    aux_size += 1;
-                }
+Al hacer ese cambio en los punteros nos aseguremos que X siempre apunte al elemento sucesor más próximo (según ASCII) perteneciente al archivo auxiliar. Esto nos servirá por si queremos hacer un search, nuestro archivo va a estar bien “conectado” por los punteros y gracias a eso vamos a poder hacer busquedas más efectivas puesto que el archivo estaría ordenado. Además cuando hacemos rebuild, puesto que los elementos estan “conectados” según su orden alfabético, este será más efectivo en términos de eficiencia.
 
-                //Ahora si tanto X como Y pertenecen a auxiliar file
-                else {
-                    bool posicionado = false;
-                    int cmp2;
-                    while(!posicionado){
+**Si X apunta a un elemento perteneciente al archivo auxiliar,** entonces si X apunta a PosY tendré que ubicarme en la posición PosY del archivo auxiliar.
 
-                        X_pos = X.Puntero; //X_pos = Y_pos
-                        X = readRecord(X_pos,this->aux_file);
+```cpp
+   if(analyzeFloat(X.Puntero)=="Auxiliar"){
+       //Si apunta a un auxiliar primero me tengo que ubicar en auxiliarfile[X.Puntero]
 
-                        //Y_pos = X.Puntero
-                        Y = readRecord(X.Puntero,this->aux_file);
+       //Y_pos = X.Puntero;
+       Record Y = readRecord(X.Puntero,this->aux_file);
+```
+**Ahora estamos frente a un caso especial.** Al analizar el gráfico nos damos cuenta que X esta en DATA FILE e Y está en AUX FILE, lo que puede llegar a ser problemático. Para ello veremos dos posibles casos:
 
-                        /*
-                            add(Conchita)
-                            ======================
-                            Data:
-                            "     " -> 0.1
-                            Asucena -> 0   <- X
-                            Ortega  -> 0.3
-                            ======================
-                            Auxiliar:
-                            Belen   ->  1   <- Y
-                            Boris   ->  0.2
+- En caso queramos insertar un elemento que sea anterior alfabéticamente a Y. Siendo Y el unico elemento que por el momento pertenece al grupo de sucesores de X en el AUXILIAR. En el ejemplo, nos damos cuenta que Baldor va despues que Azucena en el DATA, pero Azucena apunta a un elemento que pertenece al AUXILIAR, en este caso Manuel. Ya en el AUXILIAR preguntamos si “record” va despues que Manuel, y la respuesta es NO, por lo que tendremos que insertar “record” antes que Manuel.
 
-                            >>>>>>>>>>>>>>>>>>>>>>
+```cpp
+if(analyzeFloat(X.Puntero)=="Auxiliar"){
+       //Si apunta a un auxiliar primero me tengo que ubicar en auxiliarfile[X.Puntero]
 
-                            add(Conchita)
-                            ======================
-                            Data:
-                            "     " -> 0.1
-                            Asucena -> 0
-                            Ortega  -> 0.3
-                            ======================
-                            Auxiliar:
-                            Belen   ->  1   <- X
-                            Boris   ->  0.2 <- Y
+       //Y_pos = X.Puntero;
+       Record Y = readRecord(X.Puntero,this->aux_file);
 
-                         */
-                        cmp2 = record.compare(Y);
+       int cmp = record.compare(Y);
+       if (cmp <= 0){ //Si record va antes que Y o es igual a Y
+           //Agregamos el record al aux y hacemos el cambiaso de punteros entre X y record
+           record.Puntero = X.Puntero; //record -> X.Puntero
+           writeRecordEND(record, this->aux_file);
+           updatePunteroAtPosition(X_pos, aux_size, this->data_file); // X -> pos(record)
 
-                        //Si record va antes que Y
-                        if (cmp2 <= 0){
-                            //Agregamos el record al aux y hacemos el cambiaso de punteros entre X y record
-                            record.Puntero = X.Puntero; //record -> X.Puntero
-                            writeRecordEND(record, this->aux_file);
-                            updatePunteroAtPosition(X_pos, aux_size, this->aux_file); // X -> pos(record)
+           //No olvidarse de aumentar la cantidad de elementos que hay en el auxiliar.bin
+           aux_size += 1;
+       }
+```
 
-                            //No olvidarse de aumentar la cantidad de elementos que hay en el auxiliar.bin
-                            aux_size += 1;
 
-                            posicionado = true;
-                        }
 
-                        //Si record va despues que Y, y este Y apunta a un elemento perteneciente a data.file (osea que ya no apunta a ningun otro elemento)
-                        if (cmp2 > 0 && analyzeFloat(Y.Puntero)=="Data"){
-
-                            record.Puntero = Y.Puntero;
-                            writeRecordEND(record, this->aux_file);
-                            updatePunteroAtPosition(X.Puntero/*Y_pos*/, aux_size, this->aux_file);
-
-                            //No olvidarse de aumentar la cantidad de elementos que hay en el auxiliar.bin
-                            aux_size += 1;
-
-                            posicionado = true;
-                        }
-
-                        /*
-
-                         En caso record vaya despues que Y pero Y apunta a otro elemento perteneciente a auxixiliar.bin
-                         (osea no se ha llegao al final)
-
-                         Se repite el while y con ello
-                         -  X pasa a ser Y(1)
-                         -  Y pasa a ser el Y(1).Puntero
-                         */
-                    }
-                }
-            }
-        }
-
-        /*
-        Hacemos rebuild en caso que auxiliar.size() supere el log2(data.size())
-        */
-
-        if (aux_size > log2(data_size)){
-            rebuild();
-        }
-
-        }
-      ```
   2. remove_(const string& key): Elimina un registro del archivo de datos. Realiza una búsqueda binaria para encontrar la posición del registro y marca su puntero como -1 para indicar que está eliminado. Luego, realiza una reconstrucción del archivo de datos para eliminar los registros marcados como eliminados.
      ```cpp
      bool remove_(const string& key){
