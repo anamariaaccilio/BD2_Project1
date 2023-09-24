@@ -56,6 +56,19 @@ En este proyecto, implementaremos y manipularemos técnicas de organización de 
 ## Dominio de datos
 - NYC Traffic Volume
 - Twitter Bitcoin
+  
+```cpp
+struct Record
+{
+    int id;
+    char district[15];
+    int year;
+    int month;
+    int day;
+    int vol;
+    char street[30];
+}
+```
 
 ## Resultados esperados
 
