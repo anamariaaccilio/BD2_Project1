@@ -67,9 +67,9 @@ Se busca obtener una optimización significativa de los tiempos de inserción y 
 ## Sequential File Organization
 La técnica de organización de archivos llamada Sequential File es una forma de organizar y almacenar datos en un archivo, donde los registros se almacenan en secuencia, uno tras otro. Es como una lista de elementos, donde cada elemento tiene un número de posición. En este tipo de archivo, los registros están en un orden específico y se pueden acceder uno tras otro, desde el principio hasta el final, sin saltos.
 
-![sequential](https://github.com/anamariaaccilio/BD2_Project1/blob/main/sequential1.png)
+![sequential](https://github.com/anamariaaccilio/BD2_Project1/blob/main/images/sequentialfile/sequential1.png)
 
-![SequentialFile](https://github.com/anamariaaccilio/BD2_Project1/blob/main/sequential2.png)
+![SequentialFile](https://github.com/anamariaaccilio/BD2_Project1/blob/main/images/sequentialfile/sequential2.png)
 
 En este proyecto, utilizamos esta técnica para guardar datos de manera simple y eficiente. Es útil cuando no se necesita un acceso aleatorio a los datos y cuando la prioridad es la simplicidad y la eficiencia en la lectura y escritura de registros en orden.
 
@@ -85,7 +85,7 @@ Si deseamos insertar un elemento “record”, lo primero que debemos hacer es b
 int X_pos = binarySearchPosition(record) - 1; //binarySearchPOS me devuelve la pos donde debo insertar el elemento, por eso el -1
 Record X = readRecord(X_pos,this->data_file);
 ```
-![sequential](https://github.com/anamariaaccilio/BD2_Project1/blob/main/sequential1.png)
+![SequentialFile](https://github.com/anamariaaccilio/BD2_Project1/blob/main/images/sequentialfile/sequential3.png)
 
 Ahora que identificamos nuestro X (antecesor más próximo a record según ASCII), actuaremos de distinta forma si X apunta a un elemento perteneciente al mismo data.bin ó si apunta a un elemento perteneciente al auxiliar.bin
 
@@ -103,7 +103,7 @@ Ahora que identificamos nuestro X (antecesor más próximo a record según ASCII
        aux_size += 1;
    }
 ```
-![sequential](https://github.com/anamariaaccilio/BD2_Project1/blob/main/sequential1.png)
+![SequentialFile](https://github.com/anamariaaccilio/BD2_Project1/blob/main/images/sequentialfile/sequential4.png)
 
 Al hacer ese cambio en los punteros nos aseguremos que X siempre apunte al elemento sucesor más próximo (según ASCII) perteneciente al archivo auxiliar. Esto nos servirá por si queremos hacer un search, nuestro archivo va a estar bien “conectado” por los punteros y gracias a eso vamos a poder hacer busquedas más efectivas puesto que el archivo estaría ordenado. Además cuando hacemos rebuild, puesto que los elementos estan “conectados” según su orden alfabético, este será más efectivo en términos de eficiencia.
 
@@ -116,7 +116,7 @@ Al hacer ese cambio en los punteros nos aseguremos que X siempre apunte al eleme
        //Y_pos = X.Puntero;
        Record Y = readRecord(X.Puntero,this->aux_file);
 ```
-![sequential](https://github.com/anamariaaccilio/BD2_Project1/blob/main/sequential1.png)
+![SequentialFile](https://github.com/anamariaaccilio/BD2_Project1/blob/main/images/sequentialfile/sequential5.png)
 
 **Ahora estamos frente a un caso especial.** Al analizar el gráfico nos damos cuenta que X esta en DATA FILE e Y está en AUX FILE, lo que puede llegar a ser problemático. Para ello veremos dos posibles casos:
 
@@ -140,7 +140,7 @@ if(analyzeFloat(X.Puntero)=="Auxiliar"){
            aux_size += 1;
        }
 ```
-![sequential](https://github.com/anamariaaccilio/BD2_Project1/blob/main/sequential1.png)
+![SequentialFile](https://github.com/anamariaaccilio/BD2_Project1/blob/main/images/sequentialfile/sequential6.png)
 
 En caso queramos insertar un elemento que sea posterior alfabéticamente a Y. Siendo Y el unico elemento que por el momento pertenece al grupo de sucesores de X en el AUXILIAR.  En el ejemplo, nos damos cuenta que Nando va después que Azucena en el DATA, pero Azucena apunta a un elemento que pertenece al AUXILIAR, en este caso Manuel. Ya en el AUXILIAR preguntamos si “record” (Nando) va despues que Manuel, y la respuesta es SI, pero observamos que Manuel ya no apunta a ningun otro elemento, por lo que tendremos que insertar “record” después que Manuel.
 
@@ -155,7 +155,7 @@ En caso queramos insertar un elemento que sea posterior alfabéticamente a Y. Si
                aux_size += 1;
            }
 ```
-![sequential](https://github.com/anamariaaccilio/BD2_Project1/blob/main/sequential1.png)
+![SequentialFile](https://github.com/anamariaaccilio/BD2_Project1/blob/main/images/sequentialfile/sequential7.png)
 
 **(Si tanto X como Y ahora pertenecen al archivo AUXILIAR)** En caso Y no sea el único elemento que  pertenece al grupo de sucesores de X en el AUXILIAR, posiblemente tengamos que movernos de puntero en puntero dentro del AUXILIAR hasta que encontremos al mejor candidato a antecesor de “record”. 
 
@@ -186,7 +186,7 @@ En caso queramos insertar un elemento que sea posterior alfabéticamente a Y. Si
 
             */
 ```
-![sequential](https://github.com/anamariaaccilio/BD2_Project1/blob/main/sequential1.png)
+![SequentialFile](https://github.com/anamariaaccilio/BD2_Project1/blob/main/images/sequentialfile/sequential8.png)
 
 Vamos a dejar de movernos de puntero en puntero bajo dos condiciones:
 
@@ -205,7 +205,7 @@ Vamos a dejar de movernos de puntero en puntero bajo dos condiciones:
                        posicionado = true;
                    }
 ```
-![sequential](https://github.com/anamariaaccilio/BD2_Project1/blob/main/sequential1.png)
+![SequentialFile](https://github.com/anamariaaccilio/BD2_Project1/blob/main/images/sequentialfile/sequential9.png)
 
 En este caso nos hemos movido de puntero en puntero hasta que nos percatamos que Monarca (”record”) esta antes que Nando (Y), por lo que lo insertamos antes que Nando.
 
@@ -225,7 +225,7 @@ En este caso nos hemos movido de puntero en puntero hasta que nos percatamos que
                    }
 ```
 
-![sequential](https://github.com/anamariaaccilio/BD2_Project1/blob/main/sequential1.png)
+![SequentialFile](https://github.com/anamariaaccilio/BD2_Project1/blob/main/images/sequentialfile/sequential10.png)
 
 En este caso nos hemos movido de puntero en puntero hasta que nos percatamos que Norman (”record”) esta despues que Nando (Y), pero Nando ya no apuntaba a nada más. Entonces insertamos a Norman después que Nando.
 
