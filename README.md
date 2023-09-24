@@ -24,7 +24,7 @@
               <li><a href="#AVL">AVL</a></li>   
               <li><a href="#Sequential-File">Sequential File</a></li> 
           </ul>
-        <li><a href="#Funciones-implementadas">Funciones implementadas</a></li>
+        <li><a href="#Operaciones-implementadas">Operaciones implementadas</a></li>
         <li><a href="#Análisis-comparativo">Análisis comparativo</a></li>
         <li><a href="#SQL-Parser">SQL Parser</a></li>
           <ul>
@@ -635,11 +635,31 @@ Finalmente, iteramos por arriba de la cota inferior y por abajo de la cota super
 ```
 
 
-## Funciones implementadas
+## Operaciones implementadas
+
+Para cada técnica de organización de archivos, se debe implementar y visualizar las siguientes funciones:
+
+
+- `vector<Registro> search(T key)`
+- `vector<Registro> rangeSearch(T begin-key, T end-key)` 
+- `bool add(Registro registro)` 
+- `bool remove(T key)` 
+
+Asimismo, implementaremos un **Parser con SQL** y un **GUI** con **QT** para la interfaz gráfica. 
+
 ## Análsis Comparativo 
 ## SQL Parser
 La implementación del parser para consultas SQL se ha llevado a cabo siguiendo un enfoque modular y escalable. En primer lugar, hemos desarrollado un scanner que se encarga de tokenizar los lexemas de una cadena de consulta SQL. Este scanner analiza la entrada de texto y divide la consulta en tokens significativos, como palabras clave **(SELECT, INSERT, DELETE, CREATE)**, identificadores **(Campos o ID's)**, operadores y valores. Una vez que tenemos estos tokens el parser se encarga de analizar secuencialmente estos tokens, siguiendo las reglas sintácticas del lenguaje SQL en base a la diferentes tipos de consultas que se quieren hacer. A medida que avanza, verifica la estructura y la coherencia de las consultas, asegurándose de que cumplan con la sintaxis requerida, por ejemplo, si se quiere hacer un **SELECT**, se le va pidiendo al scanner los siguientes tokens y con una funcion verificamos si es el token esperado para poder continuar, si todo es correcto se ejecutan las consultas.
 ### Consultas
+
+| **Consulta** | **Sentencia** | 
+|--------------|--------------|
+| `SELECT`  | SELECT * FROM table WHERE column = value | 
+| `SELECT`  | SELECT * FROM table WHERE column BETWEEN value1 AND value2  | 
+| `CREATE` | CREATE INDEX nameIndex ON column USING typeIndex | 
+| `INSERT` |INSERT INTO table VALUES (value1,value2,...,valuen) |
+| `DELETE` | DELETE FROM table WHERE column = value |
+
 # Gráfico comparativo de las técnicas de indexación
 # Resultados experimentales
 ## Inserción
