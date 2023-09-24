@@ -65,9 +65,9 @@ Se busca obtener una optimización significativa de los tiempos de inserción y 
 - El uso de `Extendible hashing` agilizará la inserción y consulta de registros distribuyendo eficientemente los datos en bloques de almacenamiento en base a una funcion hash.
 
 
-
 # Técnicas utilizadas
 ## Técnicas de indexación
+Las estructuras que implementaremos son: `Extendible hashing` , `AVL` , `Sequential File`.
 
 ### Extendible Hashing
 
