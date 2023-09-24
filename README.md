@@ -42,8 +42,11 @@
           </ul>
       </ul>
     </a></li>
+    <li><a href="#Gráfico-Comprativo">Gráfico comparativo de las técnicas de indexación</a></li>
     <li><a href="#Experimentación">Experimentación</a></li>
+    <li><a href="#Interfaz-gráfica">Interfaz-gráfica</a></li>
     <li><a href="#conclusiones">Conclusiones</a></li>
+    <li><a href="#Team-group5">Team - Group 5</a></li>
     <li><a href="#referencias-bibliográficas">Referencias bibliográficas</a></li>
 </details>
 
