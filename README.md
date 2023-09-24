@@ -454,87 +454,96 @@ Luego tenemos que buscar además los otros elementos que tengan la misma Key que
 NOTA: Se debe de tomar en cuenta que al momento de hacer el rebuild(), este metodo no reconstruira los elementos que tengan un puntero igual a -1, puesto que los marcados de esta forma están eliminados.
 
 
-  3. search(const string& key): Busca registros por su nombre en el archivo de datos y el archivo auxiliar y devuelve una lista de registros que coinciden con el nombre proporcionado.
-     ```cpp
-      vector<Record> search(const string& key){
+#### search(const string& key): 
 
-        //DATAFILE
+Buscamos en el DATA FILE (utilizando busqueda binaria) el elemento a que se desea hallar (utilizamos busqueda binaria puesto que todos los elementos en el data.bin estan ordenados), y una vez hallado lo agregamos al vector.
 
-        //Busco con busqueda binaria la posicion del elemento
-        Record encontrar;
-        strcpy(encontrar.Nombre, key.c_str());
+```cpp
+vector<Record> search(const string& key){
 
-        // Busco con búsqueda binaria el key_pos
-        int key_pos = binarySearchPosition(encontrar);
-        if (key_pos == 0){
-            throw runtime_error("No se encontró la key");
-        }
-        else {
-            key_pos -= 1; //Pos real del key encontrado
-            Record current = readRecord(key_pos, data_file);
-            if (current.Nombre != key.c_str()){
-                throw runtime_error("No se encontró la key");
-            }
+   //DATAFILE
 
-            vector<Record> result;
+   //Busco con busqueda binaria la posicion del elemento
+   Record encontrar;
+   strcpy(encontrar.Nombre, key.c_str());
 
-            //Agregamos el key_pos encontrado
+   // Busco con búsqueda binaria el key_pos
+   int key_pos = binarySearchPosition(encontrar);
+   if (key_pos == 0){
+       throw runtime_error("No se encontró la key");
+   }
+   else {
+       key_pos -= 1; //Pos real del key encontrado
+       Record current = readRecord(key_pos, data_file);
+       if (current.Nombre != key.c_str()){
+           throw runtime_error("No se encontró la key");
+       }
 
-            result.push_back(current);
+       vector<Record> result;
 
-            // Recorrer los elementos antes del key_pos para ver si se repiten y agregarlos
-            for (int i = key_pos - 1; i >= 0; i--) {
-                current = readRecord(i, data_file);
-                Record prev = readRecord(i + 1, data_file);
-                if (current.compare(prev) == 0) {
-                    if (getPunteroAtPosition(i, data_file) != -1) {
-                        result.push_back(current);
-                    }
-                } else {
-                    break; // Si ya no se repiten, detener la búsqueda
-                }
-            }
+       //Agregamos el key_pos encontrado
 
-            // Recorrer los elementos después del key_pos para ver si se repiten y agregarlos
-            for (int i = key_pos + 1; i < size(data_file); i++) {
-                current = readRecord(i, data_file);
-                Record next = readRecord(i - 1, data_file);
-                if (current.compare(next) == 0) {
-                    if (getPunteroAtPosition(i, data_file) != -1) {
-                        result.push_back(current);
-                    }
-                } else {
-                    break; // Si ya no se repiten, detener la búsqueda
-                }
-            }
+       result.push_back(current);
+```
+
+Luego tenemos que buscar además los otros elementos que tengan la misma Key que el record para que tambien sean agregados al vector. Lo bueno es que todo ha sido diseñado para que los elementos que tienen la misma key esten juntos. Por lo que al haber ubicado el record, miraremos arriba y abajo de este para ver si hay elementos iguales. De haberlos, serán agregados al vector
+
+```cpp
+// Recorrer los elementos antes del key_pos para ver si se repiten y agregarlos
+       for (int i = key_pos - 1; i >= 0; i--) {
+           current = readRecord(i, data_file);
+           Record prev = readRecord(i + 1, data_file);
+           if (current.compare(prev) == 0) {
+               if (getPunteroAtPosition(i, data_file) != -1) {
+                   result.push_back(current);
+               }
+           } else {
+               break; // Si ya no se repiten, detener la búsqueda
+           }
+       }
+
+       // Recorrer los elementos después del key_pos para ver si se repiten y agregarlos
+       for (int i = key_pos + 1; i < size(data_file); i++) {
+           current = readRecord(i, data_file);
+           Record next = readRecord(i - 1, data_file);
+           if (current.compare(next) == 0) {
+               if (getPunteroAtPosition(i, data_file) != -1) {
+                   result.push_back(current);
+               }
+           } else {
+               break; // Si ya no se repiten, detener la búsqueda
+           }
+       }
+```
+Finalmente haremos busqueda lineal en el AUXILIAR para hallar records que sean iguales al record que queremos hallar. De ser el caso los agregamos al vector.
+
+```cpp
+//AUXILIAR FILE
+       ifstream file2(this->aux_file, ios::binary);
+       if (!file2.is_open()) {
+           throw ("No se pudo abrir el archivo de datos.");
+       }
+
+       int totalRecords = size(this->aux_file);
+
+       for (int i = 0; i < totalRecords; i++) {
+           Record record = readRecord(i, this->aux_file);
+
+           // Comparar el nombre del registro con la clave proporcionada (insensible a mayúsculas y minúsculas)
+           if (strcasecmp(record.Nombre, key.c_str()) == 0 && getPunteroAtPosition(i, this->aux_file) != -1) {
+               result.push_back(record);
+           }
+       }
+
+       file2.close();
+
+       return result;
+
+     }
+```
 
 
-            //AUXILIAR FILE
-            ifstream file2(this->aux_file, ios::binary);
-            if (!file2.is_open()) {
-                throw ("No se pudo abrir el archivo de datos.");
-            }
-
-            int totalRecords = size(this->aux_file);
-
-            for (int i = 0; i < totalRecords; i++) {
-                Record record = readRecord(i, this->aux_file);
-
-                // Comparar el nombre del registro con la clave proporcionada (insensible a mayúsculas y minúsculas)
-                if (strcasecmp(record.Nombre, key.c_str()) == 0 && getPunteroAtPosition(i, this->aux_file) != -1) {
-                    result.push_back(record);
-                }
-            }
-
-            file2.close();
-
-            return result;
-
-          }
-
-
-          }
-      ```
+    
   4. rangeSearch(const string& begin, const string& end): Realiza una búsqueda de rango en el archivo de datos y devuelve registros cuyos nombres estén en el rango especificado.
      ```cpp
      vector<Record> rangeSearch(const string& begin, const string& end) {
