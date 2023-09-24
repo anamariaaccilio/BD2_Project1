@@ -229,74 +229,71 @@ En este caso nos hemos movido de puntero en puntero hasta que nos percatamos que
 
 En este caso nos hemos movido de puntero en puntero hasta que nos percatamos que Norman (”record”) esta despues que Nando (Y), pero Nando ya no apuntaba a nada más. Entonces insertamos a Norman después que Nando.
 
-  2. remove_(const string& key): Elimina un registro del archivo de datos. Realiza una búsqueda binaria para encontrar la posición del registro y marca su puntero como -1 para indicar que está eliminado. Luego, realiza una reconstrucción del archivo de datos para eliminar los registros marcados como eliminados.
-     ```cpp
-     bool remove_(const string& key){
+##### remove_(const string& key): 
 
-        //DATA FILE
-        rebuild();
+Para eliminar algún archivo en el record, primero que nada deberemos hacer un rebuild, es decir que los records tanto de data.bin cómo de aux.bin se inserten de forma ordenada (siguiendo el orden de sus punteros) en un nuevo archivo data.bin. Hacemos el rebuild para que al momento de buscar el elemento a eliminar lo podamos hacer utilizando busqueda binaria, y además la busqueda de otros archivos iguales al record estaría libre de errores o de casos poco usuales.
 
-        bool modified = false;
+```cpp
+bool remove_(const string& key){
 
-        //Busco con busqueda binaria la posicion del elemento
-        Record encontrar;
-        strcpy(encontrar.Nombre, key.c_str());
+   //DATA FILE
+   rebuild();
+```
+Luego de hacer el rebuild, buscamos utilizando busqueda binaria el elemento a eliminar (utilizamos busqueda binaria puesto que todos los elementos ya están en el data.bin, de forma ordenada, luego de haber hecho el rebuild) y actualizaremos su puntero para que apunte a -1.
 
-        // Busco con búsqueda binaria el key_pos
-        int key_pos = binarySearchPosition(encontrar);
-        if (key_pos == 0){
-            throw runtime_error("No se encontró la key");
-        }
-        else{
-            key_pos -= 1; //Pos real del key encontrado
-            Record current = readRecord(key_pos, data_file);
-            if (current.Nombre != key){
-                throw runtime_error("No se encontró la key");
-            }
+```cpp
+// Busco con búsqueda binaria el key_pos
+   int key_pos = binarySearchPosition(encontrar);
+   if (key_pos == 0){
+       throw runtime_error("No se encontró la key");
+   }
+   else{
+       key_pos -= 1; //Pos real del key encontrado
+       Record current = readRecord(key_pos, data_file);
+       if (current.Nombre != key){
+           throw runtime_error("No se encontró la key");
+       }
 
-            //Actualizamos el primer elemento encontrado con binary search
-            updatePunteroAtPosition(key_pos, -1, this->data_file);
+       //Actualizamos el primer elemento encontrado con binary search
+       updatePunteroAtPosition(key_pos, -1, this->data_file);
 
-            // Recorrer los elementos antes del key_pos para ver si se repiten y agregarlos
-            for (int i = key_pos - 1; i >= 0; i--) {
-                current = readRecord(i, data_file);
-                Record prev = readRecord(i + 1, data_file);
-                if (current.compare(prev) == 0) {
-                    if (getPunteroAtPosition(i, data_file) != -1) {
-                        updatePunteroAtPosition(i, -1, this->data_file);
-                    }
-                } else {
-                    break; // Si ya no se repiten, detener la búsqueda
-                }
-            }
+```
 
-            // Recorrer los elementos después del key_pos para ver si se repiten y agregarlos
-            for (int i = key_pos + 1; i < size(data_file); i++) {
-                current = readRecord(i, data_file);
-                Record next = readRecord(i - 1, data_file);
-                if (current.compare(next) == 0) {
-                    if (getPunteroAtPosition(i, data_file) != -1) {
-                        updatePunteroAtPosition(i, -1, this->data_file);
-                    }
-                } else {
-                    break; // Si ya no se repiten, detener la búsqueda
-                }
-            }
-        }
+Luego tenemos que buscar además los otros elementos que tengan la misma Key que el record para que tambien sean eliminados. Lo bueno es que todo ha sido diseñado para que los elementos que tienen la misma key esten juntos. Por lo que al haber ubicado el record a eliminar, miraremos arriba y abajo de este para ver si hay elementos iguales. De haberlos, serán eliminados.
 
-        return modified;
 
-        /*
-         *Para el eliminar
-         - Se hace un rebuild ()
-         - Solo buscar el elemento por nombre, y cambiar su puntero a -1
+```cpp
+// Recorrer los elementos antes del key_pos para ver si se repiten y agregarlos
+       for (int i = key_pos - 1; i >= 0; i--) {
+           current = readRecord(i, data_file);
+           Record prev = readRecord(i + 1, data_file);
+           if (current.compare(prev) == 0) {
+               if (getPunteroAtPosition(i, data_file) != -1) {
+                   updatePunteroAtPosition(i, -1, this->data_file);
+               }
+           } else {
+               break; // Si ya no se repiten, detener la búsqueda
+           }
+       }
 
-         - Tomar en cuenta que se tiene que modificar el rebuild para que si lee un -1 en un registro_datafile,
-           que no lo agregue al nuevo datafile
-         */
-          };
+       // Recorrer los elementos después del key_pos para ver si se repiten y agregarlos
+       for (int i = key_pos + 1; i < size(data_file); i++) {
+           current = readRecord(i, data_file);
+           Record next = readRecord(i - 1, data_file);
+           if (current.compare(next) == 0) {
+               if (getPunteroAtPosition(i, data_file) != -1) {
+                   updatePunteroAtPosition(i, -1, this->data_file);
+               }
+           } else {
+               break; // Si ya no se repiten, detener la búsqueda
+           }
+       }
+```
+![SequentialFile](https://github.com/anamariaaccilio/BD2_Project1/blob/main/images/sequentialfile/sequential11.png)
 
-     ```
+NOTA: Se debe de tomar en cuenta que al momento de hacer el rebuild(), este metodo no reconstruira los elementos que tengan un puntero igual a -1, puesto que los marcados de esta forma están eliminados.
+
+
   3. search(const string& key): Busca registros por su nombre en el archivo de datos y el archivo auxiliar y devuelve una lista de registros que coinciden con el nombre proporcionado.
      ```cpp
       vector<Record> search(const string& key){
