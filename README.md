@@ -2,13 +2,6 @@
 
 
 
-<h1 align="">Grupo 5 - Integrantes:</h1>
-
-| <a href="https://github.com/anaaccilio2004" target="_blank">**Ana Maria Accilio Villanueva**</a> | <a href="https://github.com/Diegospf12" target="_blank">**Diego Pacheco Ferrel**</a> | <a href="https://github.com/juanpedrovv" target="_blank">**Juan Pedro Vasquez Vilchez**</a> | <a href="https://github.com/LuisEnriqueCortijoGonzales" target="_blank">**Luis Enrique Cortijo Gonzales**</a> | <a href="https://github.com/marceloZS" target="_blank">**Marcelo Mario Zuloeta Salazar**</a> |
-| :----------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------: |
-| <img src="https://avatars.githubusercontent.com/u/91237434?v=4" alt="drawing" width="200"/> | <img src="https://avatars.githubusercontent.com/u/94090499?v=4" alt="drawing" width="200"/> | <img src="https://avatars.githubusercontent.com/u/83739305?v=4" alt="drawing" width="200"/> | <img src="https://avatars.githubusercontent.com/u/84096868?v=4" alt="drawing" width="200"/> | <img src="https://avatars.githubusercontent.com/u/85197213?v=4" alt="drawing" width="200"/> |
-
-<hr>
 
 <a name="readme-top"></a>
 <details open>
@@ -22,8 +15,8 @@
                <li><a href="#Principal">Principal</a></li>
                <li><a href="#Secundarios">Secundarios</a></li>
              </ul>
-        <li><a href="#Descripción-del-dominio-de-datos">Descripción del dominio de datos</a></li>
-        <li><a href="#Resultados-que-se-esperan">Resultados que se esperan</a></li>
+        <li><a href="#Dominio-de-datos">Dominio de datos</a></li>
+        <li><a href="#Resultados-esperados">Resultados esperados</a></li>
       </ul>
     </a></li>
     <li><a href="#Técnicas-Utilizadas">Técnicas Utilizadas</a></li>
@@ -43,8 +36,8 @@
       </ul>
     </a></li>
     <li><a href="#Gráfico-Comprativo">Gráfico comparativo de las técnicas de indexación</a></li>
-    <li><a href="#Experimentación">Experimentación</a></li>
-    <li><a href="#Interfaz-gráfica">Interfaz-gráfica</a></li>
+    <li><a href="#Resultados-experimentales">Resultados experimentales</a></li>
+    <li><a href="#Interfaz-gráfica">Interfaz gráfica</a></li>
     <li><a href="#conclusiones">Conclusiones</a></li>
     <li><a href="#Team-group5">Team - Group 5</a></li>
     <li><a href="#referencias-bibliográficas">Referencias bibliográficas</a></li>
@@ -56,7 +49,11 @@
 
 # Introducción
 ## Objetivo del proyecto
+
+### Principal
 La organización física de archivos en memoria secundaria es la base para la creación y utilización de los diferentes sistemas de gestión de bases de datos (DBMS). En un entorno cada vez más orientado hacia la información, la estructuración eficiente de los archivos en memoria secundaria es esencial para garantizar la integridad, disponibilidad y rendimiento de los datos almacenados. Nuestro proyecto esta orientado a aplicar diferentes técnicas de organización de archivos como son las de **Sequential File Organization**, **AVL File Organization** y **Extendible Hashing** para la gestion de registros en memoria secundaria y la consulta, inserción y eliminación eficiente de la información de los registros a través de una GUI para hacer consultas con sentencias SQL.
+
+## Secundario
 
 ## Dominio de datos
 - NYC Traffic Volume
@@ -66,8 +63,171 @@ La organización física de archivos en memoria secundaria es la base para la cr
 Se busca obtener una optimización significativa de los tiempos de inserción y consulta de registros en nuestro sistema. Con Sequential File, anticipamos una aceleración en la inserción ordenada de registros, lo que mejorará la eficiencia en la consulta secuencial y búsqueda binaria. Por otro lado, la estructura de árbol AVL permitirá búsquedas en tiempo logarítmico en base a la cantidad de registros en el archivo, beneficiando las consultas por llave primaria. Finalmente, el uso de extendible hashing agilizará la inserción y consulta de registros distribuyendo eficientemente los datos en bloques de almacenamiento en base a una funcion hash. En conjunto, esperamos reducir significativamente los tiempos de respuesta para diferentes tipos de consultas en base a las diferentes técnicas de indexación usadas.
 
 # Técnicas utilizadas
+## Técnicas de indexación
 
-## Sequential File Organization
+### Extendible Hashing
+
+### AVL File Organization
+La técnica de organización de archivos AVL File se basa en la utilización de árboles AVL para almacenar registros de manera ordenada y balanceada en un archivo, basada en la estructura de árboles AVL (árbol binario de búsqueda) en la que se garantiza que la diferencia de alturas entre los subárboles izquierdo y derecho de cada nodo (conocida como el factor de equilibrio) no excede más de uno. Esto asegura que el árbol esté siempre balanceado, lo que, a su vez, garantiza que las operaciones de búsqueda, inserción y eliminación sean eficientes con un tiempo de ejecución en el peor caso de O(log n), donde "n" es el número de nodos en el árbol.
+
+La técnica de organización de archivos AVL File se utiliza en situaciones en las que es necesario realizar operaciones de búsqueda y manipulación eficientes en un archivo de registros. Cada nodo en el árbol AVL representa un registro en el archivo y contiene información sobre el registro, así como punteros a los nodos hijos izquierdo y derecho. La estructura del árbol garantiza que los registros se almacenan en un orden específico que facilita la búsqueda binaria, lo que resulta en tiempos de búsqueda muy eficientes.
+
+En las operaciones de eliminación en un archivo AVLFile, se localiza el nodo que contiene el registro a eliminar y se efectúan rotaciones para mantener el equilibrio y la altura adecuada en el árbol. La eliminación física del elemento en el archivo se pospone hasta que se realice un rebuild.
+
+![AVL](https://github.com/anamariaaccilio/BD2_Project1/blob/main/avl.png)
+
+- *Métodos importantes*
+  1. Record find: Busca un registro en el árbol AVL según una clave dada.
+     ```cpp
+     Record find(long pos_node, int key, ifstream& file){
+        Record record;
+        file.seekg(pos_node, ios::beg);
+        file.read((char*)&record, sizeof(Record));
+
+        if (record.cod == key) {
+            return record;
+        } else {
+            if (key > record.cod) {
+                if (record.right != -1) {
+                    return find(record.right, key, file);
+                } else {
+                    Record notFoundRecord;
+                    notFoundRecord.cod = -1;
+                    return notFoundRecord;
+                }
+            } else if (key < record.cod) {
+                if (record.left != -1) {
+                    return find(record.left, key, file);
+                } else {
+                    Record notFoundRecord;
+                    notFoundRecord.cod = -1;
+                    return notFoundRecord;
+                }
+            }
+        }
+       }
+    
+     ```
+  2. void insert(Record record): Inserta un nuevo registro en el árbol AVL.
+     ```cpp
+     void insert(long pos_node, Record record, fstream& file){
+        file.seekg(0, ios::end);
+        if(file.tellg() == 0){
+            file.write((char*)&record, sizeof(Record));
+            return;
+        }
+
+        Record curr_record;
+        file.seekg(pos_node, ios::beg);
+        file.read((char*)&curr_record, sizeof(Record));
+
+        if(record.cod < curr_record.cod){
+            if(curr_record.left == -1){
+                file.seekp(0, ios::end);
+                curr_record.left = file.tellg();
+                file.write((char*)&record, sizeof(Record));
+                file.seekg(pos_node, ios::beg);
+                file.write((char*)&curr_record, sizeof(Record));
+            }
+            else
+                insert(curr_record.left, record, file);
+        }else if(record.cod > curr_record.cod){
+            if(curr_record.right == -1){
+                file.seekp(0, ios::end);
+                curr_record.right = file.tellg();
+                file.write((char*)&record, sizeof(Record));
+                file.seekg(pos_node, ios::beg);
+                file.write((char*)&curr_record, sizeof(Record));
+            }
+            else
+                insert(curr_record.right, record, file);
+        }
+
+        updateHeight(pos_node, file);
+        balance(pos_node, file);
+
+       }
+     ```
+  3. void remove(T key): Elimina un registro del árbol AVL según una clave dada.
+     ```cpp
+     void remove(long pos_node, T key, fstream& file){
+        if(pos_node == -1)
+            return;
+        Record curr_record;
+        file.seekg(pos_node, ios::beg);
+        file.read((char*)&curr_record, sizeof(Record));
+
+        if(key < curr_record.cod)
+            remove(curr_record.left, key, file);
+        else if(key > curr_record.cod)
+            remove(curr_record.right, key, file);
+        else{
+            if(curr_record.left == -1 && curr_record.right == -1){
+                curr_record.cod = -1;
+                file.seekp(pos_node, ios::beg);
+                file.write((char*)&curr_record, sizeof(Record));
+            }
+            else if(curr_record.left == -1){
+                Record right_record;
+                file.seekg(curr_record.right, ios::beg);
+                file.read((char*)&right_record, sizeof(Record));
+                curr_record.cod = right_record.cod;
+                curr_record.right = right_record.right;
+                curr_record.left = right_record.left;
+                file.seekp(pos_node, ios::beg);
+                file.write((char*)&curr_record, sizeof(Record));
+            }
+            else if(curr_record.right == -1){
+                Record left_record;
+                file.seekg(curr_record.left, ios::beg);
+                file.read((char*)&left_record, sizeof(Record));
+                curr_record.cod = left_record.cod;
+                curr_record.right = left_record.right;
+                curr_record.left = left_record.left;
+                file.seekp(pos_node, ios::beg);
+                file.write((char*)&curr_record, sizeof(Record));
+            }
+            else{
+                Record left_record;
+                file.seekg(curr_record.left, ios::beg);
+                file.read((char*)&left_record, sizeof(Record));
+                curr_record.cod = left_record.cod;
+                curr_record.right = left_record.right;
+                curr_record.left = left_record.left;
+                file.seekp(pos_node, ios::beg);
+                file.write((char*)&curr_record, sizeof(Record));
+                remove(curr_record.left, left_record.cod, file);
+
+            }
+        }
+        updateHeight(pos_node, file);
+        balance(pos_node, file);
+
+       }
+     ```
+  4. vector<Record> searchRange(int start, int end, int i, vector<struct Record> vector): Busca registros en un rango específico de claves en el árbol AVL.
+     ```cpp
+     void searchRange(long pos_node, int start, int end, vector<Record>& result, ifstream& file){
+        if(pos_node == -1)
+            return;
+        Record curr_record;
+        file.seekg(pos_node, ios::beg);
+        file.read((char*)&curr_record, sizeof(Record));
+
+        if(curr_record.cod >= start && curr_record.cod <= end){
+            result.push_back(curr_record);
+            searchRange(curr_record.left, start, end, result, file);
+            searchRange(curr_record.right, start, end, result, file);
+        }
+        else if(curr_record.cod < start)
+            searchRange(curr_record.right, start, end, result, file);
+        else if(curr_record.cod > end)
+            searchRange(curr_record.left, start, end, result, file);
+       }
+     ```
+
+
+### Sequential File Organization
 La técnica de organización de archivos llamada Sequential File es una forma de organizar y almacenar datos en un archivo, donde los registros se almacenan en secuencia, uno tras otro. Es como una lista de elementos, donde cada elemento tiene un número de posición. En este tipo de archivo, los registros están en un orden específico y se pueden acceder uno tras otro, desde el principio hasta el final, sin saltos.
 
 ![sequential](https://github.com/anamariaaccilio/BD2_Project1/blob/main/images/sequentialfile/sequential1.png)
@@ -643,172 +803,19 @@ NOTA: Se debe de tomar en cuenta que al momento de hacer el rebuild(), este meto
 
       ```
 
-## AVL File Organization
-La técnica de organización de archivos AVL File se basa en la utilización de árboles AVL para almacenar registros de manera ordenada y balanceada en un archivo, basada en la estructura de árboles AVL (árbol binario de búsqueda) en la que se garantiza que la diferencia de alturas entre los subárboles izquierdo y derecho de cada nodo (conocida como el factor de equilibrio) no excede más de uno. Esto asegura que el árbol esté siempre balanceado, lo que, a su vez, garantiza que las operaciones de búsqueda, inserción y eliminación sean eficientes con un tiempo de ejecución en el peor caso de O(log n), donde "n" es el número de nodos en el árbol.
 
-La técnica de organización de archivos AVL File se utiliza en situaciones en las que es necesario realizar operaciones de búsqueda y manipulación eficientes en un archivo de registros. Cada nodo en el árbol AVL representa un registro en el archivo y contiene información sobre el registro, así como punteros a los nodos hijos izquierdo y derecho. La estructura del árbol garantiza que los registros se almacenan en un orden específico que facilita la búsqueda binaria, lo que resulta en tiempos de búsqueda muy eficientes.
-
-En las operaciones de eliminación en un archivo AVLFile, se localiza el nodo que contiene el registro a eliminar y se efectúan rotaciones para mantener el equilibrio y la altura adecuada en el árbol. La eliminación física del elemento en el archivo se pospone hasta que se realice un rebuild.
-
-![AVL](https://github.com/anamariaaccilio/BD2_Project1/blob/main/avl.png)
-
-- *Métodos importantes*
-  1. Record find: Busca un registro en el árbol AVL según una clave dada.
-     ```cpp
-     Record find(long pos_node, int key, ifstream& file){
-        Record record;
-        file.seekg(pos_node, ios::beg);
-        file.read((char*)&record, sizeof(Record));
-
-        if (record.cod == key) {
-            return record;
-        } else {
-            if (key > record.cod) {
-                if (record.right != -1) {
-                    return find(record.right, key, file);
-                } else {
-                    Record notFoundRecord;
-                    notFoundRecord.cod = -1;
-                    return notFoundRecord;
-                }
-            } else if (key < record.cod) {
-                if (record.left != -1) {
-                    return find(record.left, key, file);
-                } else {
-                    Record notFoundRecord;
-                    notFoundRecord.cod = -1;
-                    return notFoundRecord;
-                }
-            }
-        }
-       }
-    
-     ```
-  2. void insert(Record record): Inserta un nuevo registro en el árbol AVL.
-     ```cpp
-     void insert(long pos_node, Record record, fstream& file){
-        file.seekg(0, ios::end);
-        if(file.tellg() == 0){
-            file.write((char*)&record, sizeof(Record));
-            return;
-        }
-
-        Record curr_record;
-        file.seekg(pos_node, ios::beg);
-        file.read((char*)&curr_record, sizeof(Record));
-
-        if(record.cod < curr_record.cod){
-            if(curr_record.left == -1){
-                file.seekp(0, ios::end);
-                curr_record.left = file.tellg();
-                file.write((char*)&record, sizeof(Record));
-                file.seekg(pos_node, ios::beg);
-                file.write((char*)&curr_record, sizeof(Record));
-            }
-            else
-                insert(curr_record.left, record, file);
-        }else if(record.cod > curr_record.cod){
-            if(curr_record.right == -1){
-                file.seekp(0, ios::end);
-                curr_record.right = file.tellg();
-                file.write((char*)&record, sizeof(Record));
-                file.seekg(pos_node, ios::beg);
-                file.write((char*)&curr_record, sizeof(Record));
-            }
-            else
-                insert(curr_record.right, record, file);
-        }
-
-        updateHeight(pos_node, file);
-        balance(pos_node, file);
-
-       }
-     ```
-  3. void remove(T key): Elimina un registro del árbol AVL según una clave dada.
-     ```cpp
-     void remove(long pos_node, T key, fstream& file){
-        if(pos_node == -1)
-            return;
-        Record curr_record;
-        file.seekg(pos_node, ios::beg);
-        file.read((char*)&curr_record, sizeof(Record));
-
-        if(key < curr_record.cod)
-            remove(curr_record.left, key, file);
-        else if(key > curr_record.cod)
-            remove(curr_record.right, key, file);
-        else{
-            if(curr_record.left == -1 && curr_record.right == -1){
-                curr_record.cod = -1;
-                file.seekp(pos_node, ios::beg);
-                file.write((char*)&curr_record, sizeof(Record));
-            }
-            else if(curr_record.left == -1){
-                Record right_record;
-                file.seekg(curr_record.right, ios::beg);
-                file.read((char*)&right_record, sizeof(Record));
-                curr_record.cod = right_record.cod;
-                curr_record.right = right_record.right;
-                curr_record.left = right_record.left;
-                file.seekp(pos_node, ios::beg);
-                file.write((char*)&curr_record, sizeof(Record));
-            }
-            else if(curr_record.right == -1){
-                Record left_record;
-                file.seekg(curr_record.left, ios::beg);
-                file.read((char*)&left_record, sizeof(Record));
-                curr_record.cod = left_record.cod;
-                curr_record.right = left_record.right;
-                curr_record.left = left_record.left;
-                file.seekp(pos_node, ios::beg);
-                file.write((char*)&curr_record, sizeof(Record));
-            }
-            else{
-                Record left_record;
-                file.seekg(curr_record.left, ios::beg);
-                file.read((char*)&left_record, sizeof(Record));
-                curr_record.cod = left_record.cod;
-                curr_record.right = left_record.right;
-                curr_record.left = left_record.left;
-                file.seekp(pos_node, ios::beg);
-                file.write((char*)&curr_record, sizeof(Record));
-                remove(curr_record.left, left_record.cod, file);
-
-            }
-        }
-        updateHeight(pos_node, file);
-        balance(pos_node, file);
-
-       }
-     ```
-  4. vector<Record> searchRange(int start, int end, int i, vector<struct Record> vector): Busca registros en un rango específico de claves en el árbol AVL.
-     ```cpp
-     void searchRange(long pos_node, int start, int end, vector<Record>& result, ifstream& file){
-        if(pos_node == -1)
-            return;
-        Record curr_record;
-        file.seekg(pos_node, ios::beg);
-        file.read((char*)&curr_record, sizeof(Record));
-
-        if(curr_record.cod >= start && curr_record.cod <= end){
-            result.push_back(curr_record);
-            searchRange(curr_record.left, start, end, result, file);
-            searchRange(curr_record.right, start, end, result, file);
-        }
-        else if(curr_record.cod < start)
-            searchRange(curr_record.right, start, end, result, file);
-        else if(curr_record.cod > end)
-            searchRange(curr_record.left, start, end, result, file);
-       }
-     ```
-
-## Extendible Hashing
-
-## Parser SQL
+## Funciones implementadas
+## Análsis Comparativo 
+## SQL Parser
 
 La implementación del parser para consultas SQL se ha llevado a cabo siguiendo un enfoque modular y escalable. En primer lugar, hemos desarrollado un scanner que se encarga de tokenizar los lexemas de una cadena de consulta SQL. Este scanner analiza la entrada de texto y divide la consulta en tokens significativos, como palabras clave **(SELECT, INSERT, DELETE, CREATE)**, identificadores **(Campos o ID's)**, operadores y valores. Una vez que tenemos estos tokens el parser se encarga de analizar secuencialmente estos tokens, siguiendo las reglas sintácticas del lenguaje SQL en base a la diferentes tipos de consultas que se quieren hacer. A medida que avanza, verifica la estructura y la coherencia de las consultas, asegurándose de que cumplan con la sintaxis requerida, por ejemplo, si se quiere hacer un **SELECT**, se le va pidiendo al scanner los siguientes tokens y con una funcion verificamos si es el token esperado para poder continuar, si todo es correcto se ejecutan las consultas.
 
+
+### Consultas
+# Gráfico comparativo de las técnicas de indexación
+
 # Resultados experimentales
+
 
 ## Inserción
 ### Tiempo de ejecución
@@ -826,4 +833,16 @@ La implementación del parser para consultas SQL se ha llevado a cabo siguiendo 
 | 1000    | 1702 ms   | Celda 2,3    | Celda 1,3    |
 | 10000    | 97575 ms    | Celda 3,3    | Celda 1,3    |
 | 100000    | 257345 ms   | Celda 3,3    | Celda 1,3    |
+
+# Interfaz gráfica
+# Conclusiones
+# Team - Group 5
+
+
+| <a href="https://github.com/anaaccilio2004" target="_blank">**Ana Maria Accilio Villanueva**</a> | <a href="https://github.com/Diegospf12" target="_blank">**Diego Pacheco Ferrel**</a> | <a href="https://github.com/juanpedrovv" target="_blank">**Juan Pedro Vasquez Vilchez**</a> | <a href="https://github.com/LuisEnriqueCortijoGonzales" target="_blank">**Luis Enrique Cortijo Gonzales**</a> | <a href="https://github.com/marceloZS" target="_blank">**Marcelo Mario Zuloeta Salazar**</a> |
+| :----------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------: |
+| <img src="https://avatars.githubusercontent.com/u/91237434?v=4" alt="drawing" width="200"/> | <img src="https://avatars.githubusercontent.com/u/94090499?v=4" alt="drawing" width="200"/> | <img src="https://avatars.githubusercontent.com/u/83739305?v=4" alt="drawing" width="200"/> | <img src="https://avatars.githubusercontent.com/u/84096868?v=4" alt="drawing" width="200"/> | <img src="https://avatars.githubusercontent.com/u/85197213?v=4" alt="drawing" width="200"/> |
+
+
+# Referencias bibliográficas
 
