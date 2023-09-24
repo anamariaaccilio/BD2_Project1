@@ -679,8 +679,11 @@ La implementación del parser para consultas SQL se ha llevado a cabo siguiendo 
 | 100000    | 257345 ms   | Celda 3,3    | Celda 1,3    |
 
 # Interfaz gráfica
+La **GUI** fue diseñada en **QT**, ya que es un entorno de desarrollo integrado de fácil uso y más intutivo para los usuarios.
 
 # Conclusiones
+
+
 
 # Team - Group 5
 | <a href="https://github.com/anaaccilio2004" target="_blank">**Ana Maria Accilio Villanueva**</a> | <a href="https://github.com/Diegospf12" target="_blank">**Diego Pacheco Ferrel**</a> | <a href="https://github.com/juanpedrovv" target="_blank">**Juan Pedro Vasquez Vilchez**</a> | <a href="https://github.com/LuisEnriqueCortijoGonzales" target="_blank">**Luis Enrique Cortijo Gonzales**</a> | <a href="https://github.com/marceloZS" target="_blank">**Marcelo Mario Zuloeta Salazar**</a> |
