@@ -835,3 +835,12 @@ En las operaciones de eliminación en un archivo AVLFile, se localiza el nodo qu
 
 La implementación del parser para consultas SQL se ha llevado a cabo siguiendo un enfoque modular y escalable. En primer lugar, hemos desarrollado un scanner que se encarga de tokenizar los lexemas de una cadena de consulta SQL. Este scanner analiza la entrada de texto y divide la consulta en tokens significativos, como palabras clave **(SELECT, INSERT, DELETE, CREATE)**, identificadores **(Campos o ID's)**, operadores y valores. Una vez que tenemos estos tokens el parser se encarga de analizar secuencialmente estos tokens, siguiendo las reglas sintácticas del lenguaje SQL en base a la diferentes tipos de consultas que se quieren hacer. A medida que avanza, verifica la estructura y la coherencia de las consultas, asegurándose de que cumplan con la sintaxis requerida, por ejemplo, si se quiere hacer un **SELECT**, se le va pidiendo al scanner los siguientes tokens y con una funcion verificamos si es el token esperado para poder continuar, si todo es correcto se ejecutan las consultas.
 
+# Resultados experimentales
+
+## Inserción
+| Encabezado 1 | Encabezado 2 | Encabezado 3 | Extendible Hashing |
+|--------------|--------------|--------------|--------------|
+| Celda 1,1    | Celda 1,2    | Celda 1,3    | Celda 1,3    |
+| Celda 2,1    | Celda 2,2    | Celda 2,3    | Celda 1,3    |
+| Celda 3,1    | Celda 3,2    | Celda 3,3    | Celda 1,3    |
+
