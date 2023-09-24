@@ -6,6 +6,7 @@
 #include <cstring>
 #include <cmath> // Para log2
 #include <unordered_map>
+#include <bitset>
 
 using namespace std;
 
@@ -18,9 +19,17 @@ struct Record {
         file.write(reinterpret_cast<const char*>(&key), sizeof(int));
         file.write(data, sizeof(data));
     }
+    void serialize(fstream& file) const {
+        file.write(reinterpret_cast<const char*>(&key), sizeof(int));
+        file.write(data, sizeof(data));
+    }
 
     // Función de deserialización para Record
     void deserialize(ifstream& file) {
+        file.read(reinterpret_cast<char*>(&key), sizeof(int));
+        file.read(data, sizeof(data));
+    }
+    void deserialize(fstream& file) {
         file.read(reinterpret_cast<char*>(&key), sizeof(int));
         file.read(data, sizeof(data));
     }
@@ -31,20 +40,36 @@ struct Bucket {
     vector<Record> records;
     int capacidad;
     int size;
-    int borrado;
-
     Bucket(){
 
     }
 
-    Bucket(int fb) : capacidad(fb), size(0), borrado(0) {
+    size_t sizeInBits() {
+        size_t sizeBits = 0;
+
+        // Tamaño de 'capacidad' en bits
+        sizeBits += sizeof(this->capacidad);
+
+        // Tamaño de 'size' en bits
+        sizeBits += sizeof(this->size);
+
+        // Tamaño de cada registro en bits (key + data)
+        for (const Record& record : this->records) {
+            sizeBits += sizeof(record.key);
+            sizeBits += sizeof(record.data);
+        }
+
+        return sizeBits;
+    }
+
+    Bucket(int fb) : capacidad(fb), size(0) {
         records = vector<Record>(fb);
         for (int i = 0; i < fb; ++i) {
             records[i].key = -1; // Inicializa todos los registros con -1
             memset(records[i].data, 0, sizeof(records[i].data)); // Inicializa los datos con 0
         }
     }
-    Bucket(const Bucket& other) : capacidad(other.capacidad), size(other.size), borrado(other.borrado), records(other.records) {
+    Bucket(const Bucket& other) : capacidad(other.capacidad), size(other.size), records(other.records) {
     }
 
 // Operador de asignación de copia
@@ -52,7 +77,6 @@ struct Bucket {
         if (this != &other) {
             capacidad = other.capacidad;
             size = other.size;
-            borrado = other.borrado;
             records = other.records;
         }
         return *this;
@@ -61,7 +85,15 @@ struct Bucket {
     void serialize(ofstream& file) {
         file.write(reinterpret_cast<const char*>(&capacidad), sizeof(int));
         file.write(reinterpret_cast<const char*>(&size), sizeof(int));
-        file.write(reinterpret_cast<const char*>(&borrado), sizeof(int));
+
+        // Utiliza la función de serialización de Record para escribir cada registro en el vector
+        for (const Record& record : records) {
+            record.serialize(file);
+        }
+    }
+    void serialize(fstream& file) {
+        file.write(reinterpret_cast<const char*>(&capacidad), sizeof(int));
+        file.write(reinterpret_cast<const char*>(&size), sizeof(int));
 
         // Utiliza la función de serialización de Record para escribir cada registro en el vector
         for (const Record& record : records) {
@@ -73,7 +105,15 @@ struct Bucket {
     void deserialize(ifstream& file) {
         file.read(reinterpret_cast<char*>(&capacidad), sizeof(int));
         file.read(reinterpret_cast<char*>(&size), sizeof(int));
-        file.read(reinterpret_cast<char*>(&borrado), sizeof(int));
+
+        // Utiliza la función de deserialización de Record para leer cada registro del archivo
+        for (Record& record : records) {
+            record.deserialize(file);
+        }
+    }
+    void deserialize(fstream & file) {
+        file.read(reinterpret_cast<char*>(&capacidad), sizeof(int));
+        file.read(reinterpret_cast<char*>(&size), sizeof(int));
 
         // Utiliza la función de deserialización de Record para leer cada registro del archivo
         for (Record& record : records) {
@@ -91,51 +131,81 @@ struct Bucket {
     int size_of() {
         return sizeof(Record);
     }
+
+    void insert(Record &record) {
+        for(auto &i : this->records){
+            if(i.key = -1){
+                i = record;
+            }
+        }
+    }
 };
 
 struct IndexEntry {
-    int bits;
+    string bits; // Representación de cadena de bits de longitud fija
     int local_index;
 
-    int size_of(){
-        return (sizeof(int) + sizeof(int));
+    IndexEntry(int D) : bits(D, '0'), local_index(0) {} // Inicializa la cadena de bits con longitud D llena de ceros
+
+    int size_of() {
+        return (bits.size() + sizeof(int)); // Tamaño de la cadena de bits + tamaño de int
     }
 
     // Serializa el IndexEntry en un flujo de salida binario
     void serialize(ofstream& file) {
-        file.write(reinterpret_cast<const char*>(&bits), sizeof(int));
         file.write(reinterpret_cast<const char*>(&local_index), sizeof(int));
+
+        // Escribe la cadena de bits como una secuencia de caracteres
+        file.write(bits.c_str(), bits.size());
     }
 
     // Deserializa el IndexEntry desde un flujo de entrada binario
-    void deserialize(ifstream& file) {
-        file.read(reinterpret_cast<char*>(&bits), sizeof(int));
+    void deserialize(ifstream& file, int D) {
         file.read(reinterpret_cast<char*>(&local_index), sizeof(int));
+
+        // Lee solo los primeros D caracteres de la cadena de bits desde el archivo
+        char buffer[1024]; // Asumiendo un tamaño máximo de cadena de bits
+        file.read(buffer, D);
+        buffer[D] = '\0'; // Agrega el carácter nulo para terminar la cadena
+        bits.assign(buffer);
     }
+    void deserialize(fstream& file, int D) {
+        file.read(reinterpret_cast<char*>(&local_index), sizeof(int));
+
+        // Lee solo los primeros D caracteres de la cadena de bits desde el archivo
+        char buffer[1024]; // Asumiendo un tamaño máximo de cadena de bits
+        file.read(buffer, D);
+        buffer[D] = '\0'; // Agrega el carácter nulo para terminar la cadena
+        bits.assign(buffer);
+    }
+
 };
+
 
 class DynamicHash {
 private:
-    unordered_map<int ,int> posBuckets; // archivo de datos
+    unordered_map<string, int> posBuckets; // archivo de datos
     string datafile;
     string indexfile;
-    int D, FB; //D = para construir el index, fb es  el factor de bloque
-    int globalDepth; // Profundidad global
-    vector<IndexEntry> index; // Agregar un vector de entradas de índice
+    string metadatafile = "metadata.bin"; // Nuevo archivo de metadata
+    int D, FB;
+    int globalDepth;
+    vector<IndexEntry> index;
 public:
     virtual ~DynamicHash() {
-        // Liberar la memoria utilizada por el vector 'index'
-        index.clear(); // Esto liberará automáticamente la memoria de las entradas del índice
-
-        // Cerrar los archivos de datos e índice si están abiertos
-        // Asegúrate de que los archivos estén cerrados antes de que el objeto se destruya
+        // Cerrar los archivos de datos, índice y metadata si están abiertos
         ifstream dataFile(datafile);
         ifstream indexFile(indexfile);
+        ifstream metadataFile(metadatafile);
+
         if (dataFile.is_open()) {
             dataFile.close();
         }
         if (indexFile.is_open()) {
             indexFile.close();
+        }
+        if (metadataFile.is_open()) {
+            metadataFile.close();
         }
     }
 
@@ -149,106 +219,62 @@ public:
         generarBinarios(n - 1, binarioActual + '1', resultados);
     }
 
-    int hashing(int key){
-        return (key % D);
+    string hashing(int key) {
+        // Convierte el entero 'key' en una cadena de bits de longitud fija D
+        string binaryKey = bitset<32>(key).to_string().substr(32 - D);
+
+        // Aplica el hash utilizando la cadena de bits
+        return binaryKey;
     }
+
 
     DynamicHash(string datafile, string indexfile, int D, int FB) : datafile(datafile),
     indexfile(indexfile), D(D),FB(FB) {
         initialize();
     }
-    void verifyData(const string& datafile, const string& indexfile, int FB) {
-        ifstream dataFile(datafile, ios::binary);
-        ifstream indexFile(indexfile, ios::binary);
-
-        if (!dataFile.is_open() || !indexFile.is_open()) {
-            cerr << "No se pueden abrir los archivos para verificar los datos." << endl;
-            return;
-        }
-
-        // Leer la cantidad de entradas de índice desde el archivo de índice
-        int numEntries;
-        indexFile.read(reinterpret_cast<char*>(&numEntries), sizeof(int));
-
-        // Leer la profundidad global desde el archivo de índice
-        int globalDepth;
-        indexFile.read(reinterpret_cast<char*>(&globalDepth), sizeof(int));
-
-        cout << "Profundidad global: " << globalDepth << endl;
-
-        // Verificar las entradas de índice
-        vector<IndexEntry> indexEntries;
-        for (int i = 0; i < numEntries; ++i) {
-            IndexEntry entry;
-            entry.deserialize(indexFile);
-            indexEntries.push_back(entry);
-        }
-
-        for (const IndexEntry& entry : indexEntries) {
-            cout << "Posicion: " << entry.local_index << " Bits: " << entry.bits << endl;
-        }
-
-        // Leer y verificar los datos en el archivo de datos
-        int bucketPos = 0;
-        dataFile.seekg(sizeof(int));
-        while (true) {
-            Bucket bucket(FB);
-            bucket.deserialize(dataFile);
-
-            // Verificar si se alcanzó el final del archivo
-            if (dataFile.eof()) {
-                break;
-            }
-
-            cout << "Bucket #" << bucketPos << " Capacidad: " << bucket.capacidad << " Size: " << bucket.size << " Borrado: " << bucket.borrado << endl;
-
-            if (bucket.size == 0) {
-                cout << "  Bucket vacio" << endl;
-            } else {
-                for (const Record& record : bucket.records) {
-                    cout << "  Key: " << record.key << " Data: " << record.data << endl;
-                }
-            }
-
-            bucketPos++;
-        }
-
-        dataFile.close();
-        indexFile.close();
-    }
-
-
 
     void initialize() {
         ifstream dataFile(datafile, ios::binary);
         ifstream indexFile(indexfile, ios::binary);
+        ifstream meta(metadatafile, ios::binary);
+
 
         if (!dataFile.is_open() || !indexFile.is_open()) {
             globalDepth = 1; // Inicialmente, solo hay un bit de profundidad global
             // Los archivos no existen, así que crea los archivos y buckets iniciales
             ofstream newDataFile(datafile, ios::binary | ios::out | ios::app);
             ofstream newIndexFile(indexfile, ios::binary | ios::out | ios::app);
+            ofstream newmetadataFile(metadatafile, ios::binary | ios::out);
+            int freelist = -1;
+            newmetadataFile.write(reinterpret_cast<const char*>(&freelist), sizeof(int));
+            newmetadataFile.close();
+            // Crea y escribe los buckets iniciales en el archivo de datos
+            for (int i = 0; i < 2; ++i) {
+                Bucket bucket(FB);// Serializa el bucket y escríbelo en el archivo de datos
+                bucket.serialize(newDataFile);
+            }
 
+            // Cierra los archivos recién creados
+            newDataFile.close();
             // Inicializa la estructura de índice con todas las combinaciones posibles de bits
             vector<string> binarios;
             generarBinarios(D, "", binarios);
 
             for (int i = 0; i < binarios.size(); ++i) {
-                IndexEntry entry;
-                entry.bits = stoi(binarios[i], nullptr, 2);
-
-                // Calcular la profundidad de bits requerida en función de la profundidad global
-                int requiredBits = globalDepth;
-                if (requiredBits > D) {
-                    requiredBits = D;
-                }
-                //guardar el posbuckets
+                IndexEntry entry(D); // Usa D para inicializar la cadena de bits
+                entry.bits = hashing(i); // Usa la nueva función de hash
 
                 // Ajustar la posición en consecuencia
-                entry.local_index = (i % 2) * sizeof(Bucket) + sizeof(int);
-                posBuckets[i] = entry.local_index;
-
-                index.push_back(entry);
+                if (i ==0 || i % 2 == 0){
+                    entry.local_index = 0;
+                    posBuckets[entry.bits] = entry.local_index;
+                    index.push_back(entry);
+                } else{
+                    Bucket temp(FB);
+                    entry.local_index = temp.sizeInBits();
+                    posBuckets[entry.bits] = entry.local_index;
+                    index.push_back(entry);
+                }
             }
 
             // Escribe el número de entradas de índice en el archivo de índice (metadatos)
@@ -259,23 +285,11 @@ public:
             newIndexFile.write(reinterpret_cast<const char*>(&globalDepth), sizeof(int));
 
             // Escribe la estructura de índice en el archivo de índice
+            newIndexFile.seekp(sizeof(int)+ sizeof(int));
             for (IndexEntry entry : index) {
-                newIndexFile.write(reinterpret_cast<const char*>(&entry), entry.size_of());
-            }
-            //Escribe la metadata para la freelist
-            int freelist = -1;
-            newDataFile.write(reinterpret_cast<char*>(&freelist), sizeof(int)); // Pasa un puntero al valor y usa sizeof para especificar la cantidad de bytes a escribir
-            newDataFile.seekp(sizeof(int)); // Mueve el puntero de escritura al siguiente lugar si es necesario
-            // Crea y escribe los buckets iniciales en el archivo de datos
-            for (int i = 0; i < 2; ++i) {
-                Bucket bucket(FB);
-                bucket.borrado = 0; // Marcar el bucket como no utilizado
-                // Serializa el bucket y escríbelo en el archivo de datos
-                bucket.serialize(newDataFile);
+                entry.serialize(newIndexFile);
             }
 
-            // Cierra los archivos recién creados
-            newDataFile.close();
             newIndexFile.close();
         } else {
             // Los archivos existen, así que leemos los datos y el índice
@@ -290,14 +304,13 @@ public:
             indexFile.read(reinterpret_cast<char*>(&globalDepth), sizeof(int));
             indexFile.seekg(sizeof(int) + sizeof(int));
             for (int i = 0; i < numEntries; ++i) {
-                IndexEntry entry;
-                indexFile.read(reinterpret_cast<char*>(&entry), sizeof(IndexEntry));
+                IndexEntry entry(D); // Usa D para inicializar la cadena de bits
+                entry.deserialize(indexFile,D);
                 index.push_back(entry);
             }
             for (auto i : index){
                 posBuckets[i.bits] = i.local_index;
             }
-
 
             // Cerrar los archivos después de leer los datos
             dataFile.close();
@@ -307,258 +320,330 @@ public:
         indexFile.close();
     }
 
-    bool insert(Record record) {
-        // Hacer el hash del dato con la key
-        int hash = hashing(record.key);
+    void verifyData() {
+        ifstream indexFile(indexfile, ios::binary);
 
-        // Obtener la posición del bucket correspondiente al hash
-        int localIndex = posBuckets[hash];
-
-        // Leer el bucket correspondiente desde el archivo de datos
-        ifstream dataFile(datafile, ios::binary);
-        dataFile.seekg(localIndex);  // Mover el puntero al inicio del bucket
-        Bucket bucket(FB);
-        bucket.deserialize(dataFile);
-        dataFile.close();
-
-        // Verificar si el bucket está lleno o no
-        if (bucket.size < bucket.capacidad) {
-            // Buscar la primera posición vacía en el vector 'records'
-            int emptyPosition = -1;
-            for (int i = 0; i < bucket.capacidad; ++i) {
-                if (bucket.records[i].key == -1) {  //valor de los vacios
-                    emptyPosition = i;
-                    break;
-                }
-            }
-
-            if (emptyPosition != -1) {
-                bucket.records[emptyPosition] = record;
-                bucket.size++;
-
-                // Guarda el bucket actualizado en el archivo de datos
-                ofstream newDataFile(datafile, ios::binary | ios::out | ios::in);
-                newDataFile.seekp(localIndex);  // Mover el puntero al inicio del bucket
-                bucket.serialize(newDataFile);
-
-                // La inserción fue exitosa
-                newDataFile.close();
-                return true;
-            }
-        } else {
-            // Si el bucket está lleno, aumentamos la profundidad global y creamos nuevos buckets
-            globalDepth++;
-
-            // Buscar la entrada de índice correspondiente al hash
-            IndexEntry* indexEntry = nullptr;
-            for (IndexEntry& entry : index) {
-                if (entry.bits == hash) {
-                    indexEntry = &entry;
-                    break;
-                }
-            }
-
-            if (indexEntry == nullptr) {
-                cerr << "No se pudo encontrar la entrada de índice correspondiente al hash." << endl;
-                return false;
-            }
-
-            // Calcular cuántos índices apuntan al bucket lleno
-            int numIndicesApuntan = 0;
-            for (const auto& entry : index) {
-                if (entry.local_index == localIndex) {
-                    numIndicesApuntan++;
-                }
-            }
-
-            // Crear nuevos buckets para la división
-            vector<Bucket> newBuckets(numIndicesApuntan);
-            vector<int> newLocalIndexes(numIndicesApuntan);
-
-            // Dividir los registros del bucket lleno entre los nuevos buckets
-            for (int i = 0; i < bucket.size; ++i) {
-                int newHash = hashing(bucket.records[i].key);  // Calcular nuevo hash
-                int newIndex = newHash % (1 << globalDepth);  // Calcular nuevo índice
-
-                // Asignar el registro al nuevo bucket correspondiente
-                newBuckets[newIndex].records.push_back(bucket.records[i]);
-                newBuckets[newIndex].size++;
-            }
-
-            // Destruir el bucket original asignando capacidad 0
-            bucket.capacidad = 0;
-            bucket.size = 0;
-
-            // Actualizar la freelist
-            manageFreeList(localIndex);
-
-            // Guardar el bucket de división en la posición de free list o al final del archivo de datos
-            ofstream newDataFile(datafile, ios::binary | ios::out | ios::in);
-            newDataFile.seekp(localIndex);  // Mover el puntero al inicio del bucket
-            newBuckets[0].serialize(newDataFile);
-
-            // Escribir los otros buckets de división al final del archivo de datos si no se usó la freelist
-            ifstream dataFile(datafile, ios::binary);
-            int freelistPointer;
-            dataFile.read(reinterpret_cast<char*>(freelistPointer), sizeof(int));
-            if (freelistPointer == -1) {
-                for (int i = 1; i < numIndicesApuntan; ++i) {
-                    newBuckets[i].serialize(newDataFile);
-                }
-            }
-
-            // Actualizar el índice para que apunte a los nuevos buckets
-            for (int i = 0; i < numIndicesApuntan; ++i) {
-                IndexEntry newEntry;
-                // Actualizar bits en función de la nueva profundidad global
-                newEntry.bits = (hash << (32 - globalDepth)) | i;
-                // Posición del nuevo bucket en el archivo
-                newEntry.local_index = localIndex + i * sizeof(Bucket);
-                index.push_back(newEntry);
-                posBuckets[newEntry.bits] = newEntry.local_index;
-            }
-
-            // Actualizar la posición del bucket en posBuckets
-            posBuckets[hash] = localIndex;
-
-            // Actualizar el índice
-            updateIndex(hash, localIndex);
-
-            // La inserción fue exitosa
-            dataFile.close();
-            return true;
+        if (!indexFile.is_open()) {
+            cerr << "No se puede abrir el archivo de índice para verificar los datos." << endl;
+            return;
         }
 
-        // Si llegamos aquí, la inserción falló, por lo que retornamos false
+        // Leer la cantidad de entradas de índice desde el archivo de índice (metadatos)
+        int numEntries;
+        indexFile.read(reinterpret_cast<char*>(&numEntries), sizeof(int));
+
+        cout << "Total de entradas en el indice: " << numEntries << endl;
+
+        // Leer la profundidad global desde el archivo de índice
+        int globalDepth;
+        indexFile.read(reinterpret_cast<char*>(&globalDepth), sizeof(int));
+
+        cout << "Profundidad global: " << globalDepth << endl;
+
+        // Verificar las entradas de índice
+        vector<IndexEntry> indexEntries;
+        for (int i = 0; i < numEntries; ++i) {
+            IndexEntry entry(D); // Usa D para inicializar la cadena de bits
+            entry.deserialize(indexFile, D);
+            indexEntries.push_back(entry);
+        }
+
+        for (const IndexEntry& entry : indexEntries) {
+            cout << "Posicion: " << entry.local_index << " Bits: " << entry.bits << endl;
+        }
+
+        // Cerrar el archivo de índice después de leer los datos
+        indexFile.close();
+
+        ifstream dataFile(datafile, ios::binary);
+
+        if (!dataFile.is_open()) {
+            cerr << "No se puede abrir el archivo de datos para verificar los datos." << endl;
+            return;
+        }
+
+        // Leer y verificar los datos en el archivo de datos
+        int bucketPos = 0;
+        while (true) {
+            Bucket bucket(FB);
+            bucket.deserialize(dataFile);
+
+            // Verificar si se alcanzó el final del archivo de datos
+            if (dataFile.eof()) {
+                break;
+            }
+
+            cout << "Bucket #" << bucketPos << " Capacidad: " << bucket.capacidad << " Size: " << bucket.size << endl;
+
+            if (bucket.size == 0) {
+                cout << "  Bucket vacio" << endl;
+            } else {
+                for (const Record& record : bucket.records) {
+                    cout << "  Key: " << record.key << " Data: " << record.data << endl;
+                }
+            }
+
+            bucketPos++;
+        }
+
+        // Cerrar el archivo de datos después de leer los datos
         dataFile.close();
-        return false;
+
+        ifstream meta(metadatafile, ios::binary);
+
+        if (!meta.is_open()) {
+            cerr << "No se puede abrir el archivo de metadatos para verificar los datos." << endl;
+            return;
+        }
+
+        // Leer e imprimir los enteros desde el archivo de metadatos
+        int metaValue;
+        while (meta.read(reinterpret_cast<char*>(&metaValue), sizeof(int))) {
+            cout << "Valor en el archivo de metadatos: " << metaValue << endl;
+        }
+
+        // Cerrar el archivo de metadatos después de leer los datos
+        meta.close();
+    }
+
+    bool insert(const Record& record) {
+        // Obtener la cadena de bits hash para la clave del registro
+        string hashBits = hashing(record.key);
+
+        // Buscar la entrada de índice correspondiente
+        if (posBuckets.find(hashBits) != posBuckets.end()) {
+            int bucketPos = posBuckets[hashBits];
+
+            // Abrir el archivo de datos en modo lectura/escritura
+            fstream dataFileStream(datafile, ios::binary | ios::in | ios::out);
+
+            // Ir a la posición del bucket en el archivo de datos
+            dataFileStream.seekg(bucketPos);
+
+            // Leer el bucket existente desde el archivo
+            Bucket existingBucket(FB);
+            existingBucket.deserialize(dataFileStream);
+
+            // Comprobar si el bucket tiene espacio para más registros
+            if (existingBucket.size < existingBucket.capacidad) {
+                // Insertar el nuevo registro en el bucket
+                existingBucket.records[existingBucket.size] = record;
+                existingBucket.size++;
+
+                // Actualizar el bucket en el archivo de datos
+                dataFileStream.seekp(bucketPos);
+                existingBucket.serialize(dataFileStream);
+
+                // Cerrar el archivo de datos
+                dataFileStream.close();
+
+                // La inserción fue exitosa
+                return true;
+            }else {
+                // El bucket está lleno, se requiere dividir
+
+                // Aumentar la globalDepth
+                globalDepth++;
+
+                // Buscar las entradas de índice que apuntan al bucket lleno
+                vector<IndexEntry *> entriesToUpdate;
+                for (auto &entry: index) {
+                    if (entry.local_index == bucketPos) {
+                        entriesToUpdate.push_back(&entry);
+                    }
+                }
+
+                // Crear los nuevos buckets
+                Bucket newBucket1(FB), newBucket2(FB);
+                for (int i = 0; i < existingBucket.size; ++i) {
+                    // Poner la mitad de los datos en el nuevo bucket
+                    if (i % 2 == 0) {
+                        newBucket1.insert(existingBucket.records[i]);
+                    } else {
+                        newBucket2.insert(existingBucket.records[i]);
+                    }
+                }
+
+                // Guardar el nuevo bucket en el archivo de datos
+                int newBucketPos;
+                fstream meta(metadatafile, ios::binary | ios::in | ios::out);
+                int metadataPos;
+                meta.seekp(-sizeof(int), std::ios::end); // Retrocede 1 int desde el final
+                meta.read(reinterpret_cast<char *>(newBucketPos), sizeof(int));
+                if (newBucketPos != -1) {
+                    // Guardar el nuevo bucket en la posición calculada y el original en la posicion anterior
+                    dataFileStream.seekp(bucketPos);
+                    newBucket1.serialize(dataFileStream);
+                    dataFileStream.seekp(newBucketPos);
+                    newBucket2.serialize(dataFileStream);
+                } else {
+                    dataFileStream.seekp(0, std::ios::end);
+                    dataFileStream.seekp(bucketPos);
+                    newBucket1.serialize(dataFileStream);
+                    dataFileStream.seekp(newBucketPos);
+                    newBucket2.serialize(dataFileStream);
+                }
+
+                // Actualizar las entradas de índice para apuntar al nuevo bucket
+                for (auto &entry: entriesToUpdate) {
+                    entry->local_index = newBucketPos;
+                }
+
+                // Actualizar el map PosBuckets
+                for (auto i: index) {
+                    posBuckets[i.bits] = i.local_index;
+                }
+
+                // Actualizar el archivo de índice
+                ofstream newIndexFile(indexfile, ios::binary | ios::out | ios::app);
+                newIndexFile.seekp(sizeof(int) + sizeof(int));
+                for (IndexEntry entry: index) {
+                    entry.serialize(newIndexFile);
+                }
+
+                // Cerrar el archivo de datos
+                dataFileStream.close();
+
+                // Intentar insertar el registro nuevamente en los nuevos buckets
+                return insert(record);
+            }
+        } else{
+            cout<<"posicion invalida"<<endl;
+            return false;
+        }
+
+    }
+
+
+    Record search(int key) {
+        // Obtener la cadena de bits hash para la clave
+        string hashBits = hashing(key);
+
+        // Buscar la entrada de índice correspondiente
+        if (posBuckets.find(hashBits) != posBuckets.end()) {
+            int bucketPos = posBuckets[hashBits];
+
+            // Abrir el archivo de datos en modo lectura
+            ifstream dataFileStream(datafile, ios::binary);
+
+            // Ir a la posición del bucket en el archivo de datos
+            dataFileStream.seekg(bucketPos);
+
+            // Leer el bucket desde el archivo
+            Bucket existingBucket(FB);
+            existingBucket.deserialize(dataFileStream);
+
+            // Buscar el registro en el bucket
+            for (const Record& record : existingBucket.records) {
+                if (record.key == key) {
+                    // Cerrar el archivo de datos
+                    dataFileStream.close();
+
+                    // Devolver el registro encontrado
+                    return record;
+                }
+            }
+
+            // Cerrar el archivo de datos
+            dataFileStream.close();
+        }
+
+        // Si no se encuentra el registro, devuelve un registro con clave -1
+        Record notFoundRecord;
+        notFoundRecord.key = -1;
+        return notFoundRecord;
     }
 
     Record remove(int key) {
-        // Hacer el hash de la clave para encontrar el bucket
-        int hash = hashing(key);
+        // Obtener la cadena de bits hash para la clave
+        string hashBits = hashing(key);
 
-        // Obtener la entrada de índice correspondiente al hash
-        int localIndex = posBuckets[hash];
+        // Buscar la entrada de índice correspondiente
+        if (posBuckets.find(hashBits) != posBuckets.end()) {
+            int bucketPos = posBuckets[hashBits];
 
-        // Leer el bucket correspondiente desde el archivo de datos
-        ifstream dataFile(datafile, ios::binary);
-        dataFile.seekg(localIndex + sizeof(int));  // Mover el puntero al inicio del bucket
-        Bucket bucket(FB);
-        dataFile.read(reinterpret_cast<char*>(&bucket), bucket.size_of());
-        dataFile.close();
+            // Abrir el archivo de datos en modo lectura/escritura
+            fstream dataFileStream(datafile, ios::binary | ios::in | ios::out);
 
-        // Buscar el registro en el bucket
-        for (int i = 0; i < bucket.size; ++i) {
-            if (bucket.records[i].key == key) {
-                // Se encontró el registro, eliminarlo
-                Record removedRecord = bucket.remove_(i);
-                // Reducir el tamaño del bucket
-                bucket.size--;
+            // Ir a la posición del bucket en el archivo de datos
+            dataFileStream.seekg(bucketPos);
 
-                // Si el bucket está vacío, manejar la lógica de la freelist
-                if (bucket.size == 0) {
-                    manageFreeList(localIndex);
-                }
+            // Leer el bucket desde el archivo
+            Bucket existingBucket(FB);
+            existingBucket.deserialize(dataFileStream);
 
-                // Guardar el bucket actualizado en el archivo de datos
-                ofstream newDataFile(datafile, ios::binary | ios::in | ios::out);
-                newDataFile.seekp(localIndex + sizeof(int));  // Mover el puntero al inicio del bucket
-                newDataFile.write(reinterpret_cast<const char*>(&bucket), bucket.size_of());
-                newDataFile.close();
-                return removedRecord;
-            }
-        }
-        // Si no se encuentra el registro, devolver un registro vacío o un indicador de que no se encontró
-        Record emptyRecord;
-        emptyRecord.key = -1;  // Puedes usar un valor especial para indicar que no se encontró el registro
-        return emptyRecord;
-    }
+            // Buscar el registro en el bucket
+            for (int i = 0; i < existingBucket.size; ++i) {
+                if (existingBucket.records[i].key == key) {
+                    // Marcar la clave como -1 y los datos como nulos
+                    existingBucket.records[i].key = -1;
+                    memset(existingBucket.records[i].data, 0, sizeof(existingBucket.records[i].data));
+                    existingBucket.size--;
 
-    Record search(int key) {
-        // Hacer el hash de la clave para encontrar el bucket
-        int hash = hashing(key);
+                    // Actualizar el bucket en el archivo de datos
+                    dataFileStream.seekp(bucketPos);
+                    existingBucket.serialize(dataFileStream);
 
-        // Obtener la entrada de índice correspondiente al hash
-        int localIndex = posBuckets[hash];
+                    // Cerrar el archivo de datos
+                    dataFileStream.close();
 
-        // Leer el bucket correspondiente desde el archivo de datos
-        ifstream dataFile(datafile, ios::binary);
-        dataFile.seekg(localIndex);  // Mover el puntero al inicio del bucket
-        Bucket bucket(FB);
-        dataFile.read(reinterpret_cast<char*>(&bucket), bucket.size_of());
-        dataFile.close();
+                    // Verificar si el bucket está vacío
+                    if (existingBucket.size == 0) {
+                        Bucket temp(FB);
+                        int temp_ = temp.sizeInBits();
+                        // Comprobar que no sean buckets raíz
+                        if (bucketPos != 0 && bucketPos != temp_) {
+                            // Agregar la posición del bucket eliminado a la freelist en el archivo de metadatos
+                            fstream meta(metadatafile, ios::binary | ios::in | ios::out);
+                            meta.seekp(0, std::ios::end);
+                            meta.write(reinterpret_cast<char*>(&bucketPos), sizeof(int));
+                            meta.close();
 
-        // Buscar el registro en el bucket
-        for (int i = 0; i < bucket.size; ++i) {
-            if (bucket.records[i].key == key) {
-                // Se encontró el registro, devolverlo
-                return bucket.records[i];
-            }
-        }
+                            // Buscar otras entradas de índice que apunten al bucket eliminado
+                            for (auto& entry : index) {
+                                if (entry.local_index == bucketPos) {
+                                    // Buscar el sufijo de la entrada de índice
+                                    string suffix = entry.bits.substr(globalDepth - D);
 
-        // Si no se encuentra el registro, devolver un registro vacío o un indicador de que no se encontró
-        Record emptyRecord;
-        emptyRecord.key = -1;  // Puedes usar un valor especial para indicar que no se encontró el registro
-        return emptyRecord;
-    }
+                                    // Buscar una entrada de índice que tenga el mismo sufijo
+                                    for (auto& otherEntry : index) {
+                                        if (otherEntry.local_index != bucketPos &&
+                                            otherEntry.bits.substr(globalDepth - D) == suffix) {
+                                            // Redirigir la entrada de índice al bucket anterior
+                                            entry.local_index = otherEntry.local_index;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
 
-    void manageFreeList(int localIndex) {
-        // Leer el puntero al siguiente bucket libre desde la metadata
-        int freelistPointer;
-        ifstream metadataFile(datafile, ios::binary);
-        metadataFile.read(reinterpret_cast<char*>(&freelistPointer), sizeof(int));
-        metadataFile.close();
+                            // Actualizar el map PosBuckets
+                            for (auto i : index){
+                                posBuckets[i.bits] = i.local_index;
+                            }
 
-        // Si la freelist está vacía, establecer el puntero al bucket actual
-        if (freelistPointer == -1) {
-            freelistPointer = localIndex;
-        } else {
-            // Enlazar el bucket actual con el último bucket en la freelist
-            fstream metadataFile(datafile, ios::binary | ios::in | ios::out);
-            while (true) {
-                Bucket lastBucket(FB);
-                metadataFile.seekg(freelistPointer);
-                metadataFile.read(reinterpret_cast<char*>(&lastBucket), lastBucket.size_of());
-                if (lastBucket.borrado == -1) {
-                    // Este es el último bucket en la freelist, actualiza el puntero
-                    lastBucket.borrado = localIndex;
-                    metadataFile.seekp(freelistPointer);
-                    metadataFile.write(reinterpret_cast<const char*>(&lastBucket), lastBucket.size_of());
-                    metadataFile.close();
-                    break;
-                } else {
-                    // Avanzar al siguiente bucket en la freelist
-                    freelistPointer = lastBucket.borrado;
+                            // Actualizar el archivo de índice
+                            ofstream newIndexFile(indexfile, ios::binary | ios::out | ios::app);
+                            newIndexFile.seekp(sizeof(int) + sizeof(int));
+                            for (IndexEntry entry : index) {
+                                entry.serialize(newIndexFile);
+                            }
+                        } else {
+                            cout << "No se actualizó la freelist ya que es un bucket raíz" << endl;
+                        }
+                    }
+
+                    return existingBucket.records[i];
                 }
             }
+
+            // Cerrar el archivo de datos
+            dataFileStream.close();
         }
+        // Si no se encuentra el registro, devuelve un registro con clave -1
+        Record notFoundRecord;
+        notFoundRecord.key = -1;
+        return notFoundRecord;
     }
-    void updateIndex(int oldHash, int localIndex) {
-        // Verificar si la profundidad global ha cambiado
-        if (globalDepth > (1 << index[oldHash].bits)) {
-            // La profundidad global ha aumentado, duplicar las entradas de índice
-            int numEntries = index.size();
-            for (int i = 0; i < numEntries; ++i) {
-                if (index[i].bits == oldHash) {
-                    // Duplicar la entrada de índice con el nuevo bit
-                    IndexEntry newEntry;
-                    newEntry.bits = index[i].bits ^ (1 << (32 - globalDepth));
-                    newEntry.local_index = localIndex + (i % 2) * sizeof(Bucket);
-
-                    // Actualizar la posición del bucket en posBuckets
-                    posBuckets[newEntry.bits] = newEntry.local_index;
-
-                    // Agregar la nueva entrada de índice al final del vector
-                    index.push_back(newEntry);
-                }
-            }
-        } else {
-            // La profundidad global no ha cambiado, simplemente actualizar la posición del bucket en posBuckets
-            posBuckets[oldHash] = localIndex;
-        }
-    }
-
-
 
 };
