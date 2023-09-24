@@ -838,9 +838,10 @@ La implementación del parser para consultas SQL se ha llevado a cabo siguiendo 
 # Resultados experimentales
 
 ## Inserción
-| Encabezado 1 | Encabezado 2 | Encabezado 3 | Extendible Hashing |
+|              | AVL File | Sequential File | Extendible Hashing |
 |--------------|--------------|--------------|--------------|
-| Celda 1,1    | Celda 1,2    | Celda 1,3    | Celda 1,3    |
-| Celda 2,1    | Celda 2,2    | Celda 2,3    | Celda 1,3    |
-| Celda 3,1    | Celda 3,2    | Celda 3,3    | Celda 1,3    |
+| 100   | 70 ms    | Celda 1,3    | Celda 1,3    |
+| 1000    | 1702 ms   | Celda 2,3    | Celda 1,3    |
+| 10000    | 97575 ms    | Celda 3,3    | Celda 1,3    |
+| 100000    | 257345 ms   | Celda 3,3    | Celda 1,3    |
 
