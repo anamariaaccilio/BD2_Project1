@@ -7,8 +7,7 @@
 <details open>
   <summary><h2>Tabla de contenidos:<h2></summary>
   <ul>
-    <li><a href="#introducción-🖊">
-      Introducción
+    <li><a href="#Introducción-🖊">Introducción
       <ul>
         <li><a href="#objetivo-del-proyecto">Objetivo del proyecto</a></li>
              <ul>
