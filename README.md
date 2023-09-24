@@ -235,7 +235,7 @@ En este proyecto, utilizamos esta técnica para guardar datos de manera simple y
 
 #### *Métodos importantes*
 
-##### add(Record record): Agrega un nuevo registro al archivo de datos siguiendo una lógica específica. Dependiendo de ciertas condiciones, los registros se pueden agregar al archivo auxiliar o al archivo de datos principal.
+##### 1. add(Record record): Agrega un nuevo registro al archivo de datos siguiendo una lógica específica. Dependiendo de ciertas condiciones, los registros se pueden agregar al archivo auxiliar o al archivo de datos principal.
      
 Antes de insertar cualquier elemento en un Sequential File, se debe de tomar en cuenta que directamente nunca se va a escribir un elemento en el archivo data.bin (nuestro archivo principal). Todo elemento nuevo va a ser insertado en el archivo auxiliar.bin (nuestro archivo auxiliar), y cuando auxiliar.bin ya este lleno de registros haremos un rebuild. El rebuild nos permite trasladar todos los elementos pertenecientes a data.bin y a auxiliar.bin de manera ordenada a un nuevo archivo data.bin.
 
@@ -389,7 +389,7 @@ En este caso nos hemos movido de puntero en puntero hasta que nos percatamos que
 
 En este caso nos hemos movido de puntero en puntero hasta que nos percatamos que Norman (”record”) esta despues que Nando (Y), pero Nando ya no apuntaba a nada más. Entonces insertamos a Norman después que Nando.
 
-##### remove_(const string& key): 
+##### 2. remove_(const string& key): 
 
 Para eliminar algún archivo en el record, primero que nada deberemos hacer un rebuild, es decir que los records tanto de data.bin cómo de aux.bin se inserten de forma ordenada (siguiendo el orden de sus punteros) en un nuevo archivo data.bin. Hacemos el rebuild para que al momento de buscar el elemento a eliminar lo podamos hacer utilizando busqueda binaria, y además la busqueda de otros archivos iguales al record estaría libre de errores o de casos poco usuales.
 
@@ -454,7 +454,7 @@ Luego tenemos que buscar además los otros elementos que tengan la misma Key que
 NOTA: Se debe de tomar en cuenta que al momento de hacer el rebuild(), este metodo no reconstruira los elementos que tengan un puntero igual a -1, puesto que los marcados de esta forma están eliminados.
 
 
-#### search(const string& key): 
+#### 3. search(const string& key): 
 
 Buscamos en el DATA FILE (utilizando busqueda binaria) el elemento a que se desea hallar (utilizamos busqueda binaria puesto que todos los elementos en el data.bin estan ordenados), y una vez hallado lo agregamos al vector.
 
@@ -627,104 +627,6 @@ Finalmente, iteramos por arriba de la cota inferior y por abajo de la cota super
           }
 ```
 
-  5. rebuild(): Este método se utiliza para reconstruir el archivo de datos principal. Elimina registros marcados como eliminados y reorganiza los registros válidos.
-      ```cpp
-      void rebuild() {
-
-        ifstream dataFileStream(data_file, ios::binary);
-        if (!dataFileStream.is_open()) {
-            cerr << "No se pudo abrir el archivo de datos: " << data_file << endl;
-            return;
-        }
-
-        ofstream newFileStream("nuevo_data_file.bin", ios::binary);
-        if (!newFileStream.is_open()) {
-            cerr << "No se pudo crear el nuevo archivo de datos." << endl;
-            return;
-        }
-
-        Record X;
-        float puntero = -0.9;
-        float puntero_temporal;
-
-        int cantidad_eliminados = 0;
-
-        // Iterar a través de los registros en el archivo de datos
-        while (dataFileStream.read(reinterpret_cast<char*>(&X), sizeof(Record))) {
-
-            if (X.Puntero == -1){
-                cantidad_eliminados += 1;
-            }
-
-            //Nos saltamos los records que apunten a -1, ya que estos estan eliminados
-            if (X.Puntero != -1){
-                //Agregamos X al nuevo data_file
-                puntero += 1;
-                puntero_temporal = X.Puntero;
-                X.Puntero = puntero;
-                writeRecordEND(X,"nuevo_data_file.bin");
-
-                //En caso X apunte a un registro perteneciente al espacio auxiliar
-                if (analyzeFloat(puntero_temporal ) == "Auxiliar"){
-                    //Sabemos que X apunta a Y
-                    //Nos ubicamos en Y
-                    Record Y;
-                    while (analyzeFloat(puntero_temporal) != "Data" ){
-                        puntero += 1;
-                        Y = readRecord(puntero_temporal,this->aux_file);
-                        puntero_temporal = Y.Puntero;
-                        Y.Puntero = puntero;
-                        writeRecordEND(Y,"nuevo_data_file.bin");
-                    };
-                }
-            }
-        }
-
-        dataFileStream.close();
-        newFileStream.close();
-
-        // Reemplazar el archivo original con el nuevo archivo
-        if (remove(data_file.c_str()) != 0) {
-            cerr << "Error al eliminar el archivo original." << endl;
-        }
-
-        if (rename("nuevo_data_file.bin", data_file.c_str()) != 0) {
-            cerr << "Error al renombrar el nuevo archivo." << endl;
-        }
-
-        clearFile(this->aux_file);
-
-        //Actualizamos la cantidad de elementos que hay en ambos archivos
-        data_size += (aux_size - cantidad_eliminados);
-        aux_size = 0;
-
-        }
-
-      ```
-  6. size(string _file): Calcula y devuelve la cantidad de registros en un archivo específico.
-      ```cpp
-      int size(string _file){
-        ifstream file(_file, ios::binary);
-        if(!file.is_open()) throw ("No se pudo abrir el archivo");
-
-        file.seekg(0, ios::end);//ubicar cursos al final del archivo
-        long total_bytes = file.tellg();//cantidad de bytes del archivo
-        file.close();
-        return total_bytes / sizeof(Record);
-        }
-      
-      ```
-  7. analyzeFloat(float number): Determina si un número flotante corresponde a un registro almacenado en el archivo auxiliar o en el archivo de datos principal.
-      ```cpp
-      string analyzeFloat(float number) {
-        if (std::floor(number) == number) {
-            return "Auxiliar";
-        } else {
-            return "Data";
-        }
-      }
-
-      ```
   8. binarySearchPosition(const Record& nuevoRecord): Realiza una búsqueda binaria en el archivo de datos para encontrar la posición en la que debería insertarse un nuevo registro en orden alfabético. Si el registro ya existe, devuelve la posición actual del registro encontrado.
       ```cpp
       int binarySearchPosition(const Record& nuevoRecord) {
