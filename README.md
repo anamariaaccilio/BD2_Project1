@@ -85,6 +85,7 @@ Si deseamos insertar un elemento “record”, lo primero que debemos hacer es b
 int X_pos = binarySearchPosition(record) - 1; //binarySearchPOS me devuelve la pos donde debo insertar el elemento, por eso el -1
 Record X = readRecord(X_pos,this->data_file);
 ```
+![sequential](https://github.com/anamariaaccilio/BD2_Project1/blob/main/sequential1.png)
 
 Ahora que identificamos nuestro X (antecesor más próximo a record según ASCII), actuaremos de distinta forma si X apunta a un elemento perteneciente al mismo data.bin ó si apunta a un elemento perteneciente al auxiliar.bin
 
@@ -102,6 +103,7 @@ Ahora que identificamos nuestro X (antecesor más próximo a record según ASCII
        aux_size += 1;
    }
 ```
+![sequential](https://github.com/anamariaaccilio/BD2_Project1/blob/main/sequential1.png)
 
 Al hacer ese cambio en los punteros nos aseguremos que X siempre apunte al elemento sucesor más próximo (según ASCII) perteneciente al archivo auxiliar. Esto nos servirá por si queremos hacer un search, nuestro archivo va a estar bien “conectado” por los punteros y gracias a eso vamos a poder hacer busquedas más efectivas puesto que el archivo estaría ordenado. Además cuando hacemos rebuild, puesto que los elementos estan “conectados” según su orden alfabético, este será más efectivo en términos de eficiencia.
 
@@ -114,6 +116,8 @@ Al hacer ese cambio en los punteros nos aseguremos que X siempre apunte al eleme
        //Y_pos = X.Puntero;
        Record Y = readRecord(X.Puntero,this->aux_file);
 ```
+![sequential](https://github.com/anamariaaccilio/BD2_Project1/blob/main/sequential1.png)
+
 **Ahora estamos frente a un caso especial.** Al analizar el gráfico nos damos cuenta que X esta en DATA FILE e Y está en AUX FILE, lo que puede llegar a ser problemático. Para ello veremos dos posibles casos:
 
 - En caso queramos insertar un elemento que sea anterior alfabéticamente a Y. Siendo Y el unico elemento que por el momento pertenece al grupo de sucesores de X en el AUXILIAR. En el ejemplo, nos damos cuenta que Baldor va despues que Azucena en el DATA, pero Azucena apunta a un elemento que pertenece al AUXILIAR, en este caso Manuel. Ya en el AUXILIAR preguntamos si “record” va despues que Manuel, y la respuesta es NO, por lo que tendremos que insertar “record” antes que Manuel.
@@ -136,6 +140,7 @@ if(analyzeFloat(X.Puntero)=="Auxiliar"){
            aux_size += 1;
        }
 ```
+![sequential](https://github.com/anamariaaccilio/BD2_Project1/blob/main/sequential1.png)
 
 En caso queramos insertar un elemento que sea posterior alfabéticamente a Y. Siendo Y el unico elemento que por el momento pertenece al grupo de sucesores de X en el AUXILIAR.  En el ejemplo, nos damos cuenta que Nando va después que Azucena en el DATA, pero Azucena apunta a un elemento que pertenece al AUXILIAR, en este caso Manuel. Ya en el AUXILIAR preguntamos si “record” (Nando) va despues que Manuel, y la respuesta es SI, pero observamos que Manuel ya no apunta a ningun otro elemento, por lo que tendremos que insertar “record” después que Manuel.
 
@@ -150,6 +155,8 @@ En caso queramos insertar un elemento que sea posterior alfabéticamente a Y. Si
                aux_size += 1;
            }
 ```
+![sequential](https://github.com/anamariaaccilio/BD2_Project1/blob/main/sequential1.png)
+
 **(Si tanto X como Y ahora pertenecen al archivo AUXILIAR)** En caso Y no sea el único elemento que  pertenece al grupo de sucesores de X en el AUXILIAR, posiblemente tengamos que movernos de puntero en puntero dentro del AUXILIAR hasta que encontremos al mejor candidato a antecesor de “record”. 
 
 - Lo que vamos a hacer es movernos según los punteros (osea en el orden alfabético) preguntando si nuestro “record” va despues que el elemento i. En caso la respuesta sea SI el nuevo elemento i va a ser el i+1.
@@ -179,6 +186,7 @@ En caso queramos insertar un elemento que sea posterior alfabéticamente a Y. Si
 
             */
 ```
+![sequential](https://github.com/anamariaaccilio/BD2_Project1/blob/main/sequential1.png)
 
 Vamos a dejar de movernos de puntero en puntero bajo dos condiciones:
 
@@ -197,6 +205,8 @@ Vamos a dejar de movernos de puntero en puntero bajo dos condiciones:
                        posicionado = true;
                    }
 ```
+![sequential](https://github.com/anamariaaccilio/BD2_Project1/blob/main/sequential1.png)
+
 En este caso nos hemos movido de puntero en puntero hasta que nos percatamos que Monarca (”record”) esta antes que Nando (Y), por lo que lo insertamos antes que Nando.
 
 - O si detectamos que que “record” va después que algún Y, pero este Y apunta a un elemento perteneciente al DATA FILE, es decir Y ya no apunta a otro elemento que vaya después que él (alfabéticamente) en el AUX FILE.
@@ -215,7 +225,9 @@ En este caso nos hemos movido de puntero en puntero hasta que nos percatamos que
                    }
 ```
 
+![sequential](https://github.com/anamariaaccilio/BD2_Project1/blob/main/sequential1.png)
 
+En este caso nos hemos movido de puntero en puntero hasta que nos percatamos que Norman (”record”) esta despues que Nando (Y), pero Nando ya no apuntaba a nada más. Entonces insertamos a Norman después que Nando.
 
   2. remove_(const string& key): Elimina un registro del archivo de datos. Realiza una búsqueda binaria para encontrar la posición del registro y marca su puntero como -1 para indicar que está eliminado. Luego, realiza una reconstrucción del archivo de datos para eliminar los registros marcados como eliminados.
      ```cpp
