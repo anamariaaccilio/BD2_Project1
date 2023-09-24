@@ -8,27 +8,36 @@
 using namespace std;
 
 class Record {
-private:
 
 public:
-    char Nombre[12];
-    char Apellidos[12];
+    char id[8];
+    int year;
+    int month;
+    int day;
+    int volume;
+    char street[30];
     float Puntero;
 
     void setData(){
-        cout<<"Nombre:";
-        cin>>Nombre;
-        cout<<"Apellidos:";
-        cin>>Apellidos;
+        cout<<"ID:";
+        cin>>id;
+        cout<<"Street:";
+        cin>>street;
+        cout<<"Year:";
+        cin>>year;
     }
     void showData(){
-        cout<<Nombre<<" - "<<Apellidos<<" - "<<Puntero<<endl;
+        cout<<id<<" - "<<street<<" - "<<year<<" - "<<Puntero<<endl;
     }
+
 
     // Agregar un método para comparar el nombre de dos records
     int compare(const Record& otro) const {
-        return strcmp(Nombre, otro.Nombre);
+        return strcmp(id, otro.id);
     }
+
+
+
 };
 
 class SequentialFile
@@ -60,7 +69,7 @@ public:
         if (!checkFile.is_open()) {
             // El archivo no existe, entonces lo creamos y escribimos el registro predeterminado
             Record defaultRecord;
-            strcpy(defaultRecord.Nombre, "\0\0\0\0\0\0\0\0\0\0\0\0");
+            strcpy(defaultRecord.id, "\0\0\0\0\0\0\0\0\0\0\0\0");
             defaultRecord.Puntero = 0.1;
             writeRecordPOS(defaultRecord, 0, this->data_file);
         } else {
@@ -114,6 +123,7 @@ public:
 
     }
 
+    template <typename T>
     void add(Record record){
         //Ubicamos el elemento anterior a record
         int X_pos = binarySearchPosition(record) - 1; //binarySearchPOS me devuelve la pos donde debo insertar el elemento, por eso el -1
@@ -204,7 +214,7 @@ public:
                     aux_size += 1;
                 }
 
-                //Ahora si tanto X como Y pertenecen a auxiliar file
+                    //Ahora si tanto X como Y pertenecen a auxiliar file
                 else {
                     bool posicionado = false;
                     int cmp2;
@@ -294,7 +304,8 @@ public:
 
     }
 
-    bool remove_(const string& key){
+    template <class T>
+    bool remove_(T key){
 
         //DATA FILE
         rebuild();
@@ -303,7 +314,7 @@ public:
 
         //Busco con busqueda binaria la posicion del elemento
         Record encontrar;
-        strcpy(encontrar.Nombre, key.c_str());
+        strcpy(encontrar.id, key.c_str());
 
         // Busco con búsqueda binaria el key_pos
         int key_pos = binarySearchPosition(encontrar);
@@ -313,7 +324,7 @@ public:
         else{
             key_pos -= 1; //Pos real del key encontrado
             Record current = readRecord(key_pos, data_file);
-            if (current.Nombre != key){
+            if (current.id != key){
                 throw runtime_error("No se encontró la key");
             }
 
@@ -359,24 +370,25 @@ public:
          */
     };
 
-    vector<Record> search(const string& key){
+    template <typename T>
+    vector<Record> search(const T& key){
 
         //DATAFILE
 
         //Busco con busqueda binaria la posicion del elemento
         Record encontrar;
-        strcpy(encontrar.Nombre, key.c_str());
+        strcpy(encontrar.id, key.c_str());
 
         // Busco con búsqueda binaria el key_pos
         int key_pos = binarySearchPosition(encontrar);
         if (key_pos == 0){
-            throw runtime_error("No se encontró la key");
+            throw runtime_error("No se encontró la key 1");
         }
         else {
             key_pos -= 1; //Pos real del key encontrado
             Record current = readRecord(key_pos, data_file);
-            if (current.Nombre != key.c_str()){
-                throw runtime_error("No se encontró la key");
+            if (strcmp(current.id, key.c_str()) != 0){
+                throw runtime_error("No se encontró la key 2");
             }
 
             vector<Record> result;
@@ -424,7 +436,7 @@ public:
                 Record record = readRecord(i, this->aux_file);
 
                 // Comparar el nombre del registro con la clave proporcionada (insensible a mayúsculas y minúsculas)
-                if (strcasecmp(record.Nombre, key.c_str()) == 0 && getPunteroAtPosition(i, this->aux_file) != -1) {
+                if (strcasecmp(record.id, key.c_str()) == 0 && getPunteroAtPosition(i, this->aux_file) != -1) {
                     result.push_back(record);
                 }
             }
@@ -438,12 +450,13 @@ public:
 
     }
 
-    vector<Record> rangeSearch(const string& begin, const string& end) {
+    template <typename T>
+    vector<Record> rangeSearch(const T& begin, const T& end) {
         rebuild();
 
         //Busco con busqueda binaria la posicion del begin
         Record encontrar_begin;
-        strcpy(encontrar_begin.Nombre, begin.c_str());
+        strcpy(encontrar_begin.id, begin.c_str());
         int limite_inferior = binarySearchPosition(encontrar_begin);
 
         if (limite_inferior == 0){
@@ -452,14 +465,14 @@ public:
         else {
             limite_inferior -= 1;
             Record inf = readRecord(limite_inferior, this->data_file);
-            if (inf.Nombre != begin){
+            if (strcmp(inf.id, begin.c_str()) != 0){
                 throw runtime_error("No se encontró la key inferior");
             }
         }
 
         //Busco con busqueda binaria la posicion del end
         Record encontrar_end;
-        strcpy(encontrar_end.Nombre, end.c_str());
+        strcpy(encontrar_end.id, end.c_str());
         int limite_superior = binarySearchPosition(encontrar_end);
         if (limite_superior == 0){
             throw runtime_error("No se encontró el límite superior");
@@ -467,7 +480,7 @@ public:
         else {
             limite_superior -= 1;
             Record sup = readRecord(limite_superior, this->data_file);
-            if (sup.Nombre != end){
+            if (strcmp(sup.id, end.c_str()) != 0){
                 throw runtime_error("No se encontró la key superior");
             }
         }
@@ -606,6 +619,7 @@ private:
 
     //Binary Search Position me devuelve la posicion donde tiene que ser insertado cierto registro
     //Si en data_file existe A (ubicado en pos 0), y quiero insertar B, entonces binary me devuelve pos 1 (pos 0 + 1), ya que A esta despues que B.
+
     int binarySearchPosition(const Record& nuevoRecord) {
 
         /*
@@ -776,10 +790,10 @@ private:
 int main()
 {
     //Add
-    /*SequentialFile file1;
+    SequentialFile file1;
     Record record;
     record.setData();
-    file1.add(record);*/
+    file1.add<string>(record);
 
     //Remove
     /*
@@ -795,9 +809,8 @@ int main()
     cout << "-------------------------" <<endl;
 
     //Search
-    /*
     SequentialFile file10;
-    vector<Record> resultados = file10.search("Azteca");
+    /*vector<Record> resultados = file10.search<string>("ds");
     // Recorrer el vector e imprimir los resultados
     for(Record r : resultados){
         r.showData();
@@ -805,9 +818,9 @@ int main()
 
     //Range Search
     SequentialFile file7;
-    vector<Record> resultados = file7.rangeSearch("Mortina","Azteca");
+    vector<Record> resultados2 = file7.rangeSearch<string>("55","ds");
     // Recorrer el vector e imprimir los resultados
-    for(Record r : resultados){
+    for(Record r : resultados2){
         r.showData();
     }
 }
