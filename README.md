@@ -1,11 +1,55 @@
 # Organización de Archivos
 
-## Grupo 5
-* Ana Maria Accilio Villanueva
-* Diego Sebastián Pacheco Ferrel
-* Juan Pedro Vásquez Vílchez
-* Luis Enrique Cortijo Gonzales
-* Marcelo Mario Zuloeta Salazar
+
+
+<h1 align="">Grupo 5 - Integrantes:</h1>
+
+| <a href="https://github.com/anaaccilio2004" target="_blank">**Ana Maria Accilio Villanueva**</a> | <a href="https://github.com/Diegospf12" target="_blank">**Diego Pacheco Ferrel**</a> | <a href="https://github.com/juanpedrovv" target="_blank">**Juan Pedro Vasquez Vilchez**</a> | <a href="https://github.com/LuisEnriqueCortijoGonzales" target="_blank">**Luis Enrique Cortijo Gonzales**</a> | <a href="https://github.com/marceloZS" target="_blank">**Marcelo Mario Zuloeta Salazar**</a> |
+| :----------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------: |
+| <img src="https://avatars.githubusercontent.com/u/91237434?v=4" alt="drawing" width="200"/> | <img src="https://avatars.githubusercontent.com/u/94090499?v=4" alt="drawing" width="200"/> | <img src="https://avatars.githubusercontent.com/u/83739305?v=4" alt="drawing" width="200"/> | <img src="https://avatars.githubusercontent.com/u/84096868?v=4" alt="drawing" width="200"/> | <img src="https://avatars.githubusercontent.com/u/85197213?v=4" alt="drawing" width="200"/> |
+
+<hr>
+
+<a name="readme-top"></a>
+<details open>
+  <summary><h2>Tabla de contenidos:<h2></summary>
+  <ul>
+    <li><a href="#introducción-🖊">
+      Introducción
+      <ul>
+        <li><a href="#objetivo-del-proyecto">Objetivo del proyecto</a></li>
+             <ul>
+               <li><a href="#Principal">Principal</a></li>
+               <li><a href="#Secundarios">Secundarios</a></li>
+             </ul>
+        <li><a href="#Descripción-del-dominio-de-datos">Descripción del dominio de datos</a></li>
+        <li><a href="#Resultados-que-se-esperan">Resultados que se esperan</a></li>
+      </ul>
+    </a></li>
+    <li><a href="#Técnicas-Utilizadas">Técnicas Utilizadas</a></li>
+      <ul>
+        <li><a href="#Técnicas-de-indexación">Técnicas de indexación</a></li>
+            <ul>
+              <li><a href="#Extendible-Hashing">Extendible Hashing</a></li> 
+              <li><a href="#AVL">AVL</a></li>   
+              <li><a href="#Sequential-File">Sequential File</a></li> 
+          </ul>
+        <li><a href="#Funciones-implementadas">Funciones implementadas</a></li>
+        <li><a href="#Análisis-comparativo">Análisis comparativo</a></li>
+        <li><a href="#SQL-Parser">SQL Parser</a></li>
+          <ul>
+               <li><a href="#Consultas">Consultas</a></li>   
+          </ul>
+      </ul>
+    </a></li>
+    <li><a href="#Experimentación">Experimentación</a></li>
+    <li><a href="#conclusiones">Conclusiones</a></li>
+    <li><a href="#referencias-bibliográficas">Referencias bibliográficas</a></li>
+</details>
+
+<hr>
+
+
 
 # Introducción
 ## Objetivo del proyecto
