@@ -542,6 +542,90 @@ Finalmente haremos busqueda lineal en el AUXILIAR para hallar records que sean i
      }
 ```
 
+#### 4. rangeSearch(const string& begin, const string& end): Realiza una búsqueda de rango en el archivo de datos y devuelve registros cuyos nombres estén en el rango especificado.
+
+Hacemos el rebuild para que al momento de buscar el elemento lo podamos hacer utilizando busqueda binaria, y además la busqueda de otros archivos iguales al record estaría libre de errores o de casos poco usuales.
+Posterior a hacer el rebuild, en el DATA FILE, puesto que ya todos los elementos estan ordenados, vamos a hacer busqueda binaria para hallar tanto la cota inferior como la superior.
+```cpp
+vector<Record> rangeSearch(const string& begin, const string& end) {
+        rebuild();
+
+        //Busco con busqueda binaria la posicion del begin
+        Record encontrar_begin;
+        strcpy(encontrar_begin.Nombre, begin.c_str());
+        int limite_inferior = binarySearchPosition(encontrar_begin);
+
+        if (limite_inferior == 0){
+            throw runtime_error("No se encontró el límite inferior");
+        }
+        else {
+            limite_inferior -= 1;
+            Record inf = readRecord(limite_inferior, this->data_file);
+            if (inf.Nombre != begin){
+                throw runtime_error("No se encontró la key inferior");
+            }
+        }
+
+        //Busco con busqueda binaria la posicion del end
+        Record encontrar_end;
+        strcpy(encontrar_end.Nombre, end.c_str());
+        int limite_superior = binarySearchPosition(encontrar_end);
+        if (limite_superior == 0){
+            throw runtime_error("No se encontró el límite superior");
+        }
+        else {
+            limite_superior -= 1;
+            Record sup = readRecord(limite_superior, this->data_file);
+            if (sup.Nombre != end){
+                throw runtime_error("No se encontró la key superior");
+            }
+        }
+```
+Una vez ubicadas la cota inferior y superior vamos a agregar los elementos que estan entre estos. Al hacer rangeSearch(const string& cota_inferior, const string& cota_superior), se toma en cuenta tanto el caso en que limite_inferior > limite_superior, y limite_inferior <= limite_superior. En el ultimo caso la cota inferior pasara a ser la superior y viceversa (swap).
+```cpp
+     vector<Record> result;
+
+        // Agregar los elementos que están entre el límite inferior y el superior (Si apuntan a -1 no se agregan)
+        if (limite_inferior <= limite_superior);
+        else swap(limite_inferior, limite_superior);// En caso de que begin sea mayor que end, intercambiamos los límites
+
+        for (int i = limite_inferior; i <= limite_superior; i++) {
+            Record record = readRecord(i, data_file);
+            if (getPunteroAtPosition(i, data_file) != -1) {
+                result.push_back(record);
+            }
+        }
+```
+
+Finalmente, iteramos por arriba de la cota inferior y por abajo de la cota superior para hallar elementos que sean iguales a estos y agregarlos al vector resultante.
+```cpp
+
+        // Recorrer los elementos antes del límite inferior para ver si se repiten y agregarlos (si apuntan a -1 no se agregan)
+        for (int i = limite_inferior - 1; i >= 0; i--) {
+            Record current = readRecord(i, data_file);
+            Record prev = readRecord(i + 1, data_file);
+            if (current.compare(prev) == 0 && getPunteroAtPosition(i, data_file) != -1) {
+                result.push_back(current);
+            } else if (current.compare(prev) != 0){
+                break; // Si ya no se repiten o apuntan a -1, detener la búsqueda
+            }
+        }
+
+        // Recorrer los elementos después del límite superior para ver si se repiten y agregarlos (si apuntan a -1 no se agregan)
+        for (int i = limite_superior + 1; i < size(data_file); i++) {
+            Record current = readRecord(i, data_file);
+            Record next = readRecord(i - 1, data_file);
+            if (current.compare(next) == 0 && getPunteroAtPosition(i, data_file) != -1) {
+                result.push_back(current);
+            } else if (current.compare(next) != 0){
+                break; // Si ya no se repiten o apuntan a -1, detener la búsqueda
+            }
+        }
+
+        return result;
+
+          }
+```
 
     
   4. rangeSearch(const string& begin, const string& end): Realiza una búsqueda de rango en el archivo de datos y devuelve registros cuyos nombres estén en el rango especificado.
