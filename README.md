@@ -91,7 +91,7 @@ La técnica de organización de archivos AVL File se utiliza en situaciones en l
 
 En las operaciones de eliminación en un archivo AVLFile, se localiza el nodo que contiene el registro a eliminar y se efectúan rotaciones para mantener el equilibrio y la altura adecuada en el árbol. La eliminación física del elemento en el archivo se pospone hasta que se realice un rebuild.
 
-![AVL](https://github.com/anamariaaccilio/BD2_Project1/blob/main/avl.png)
+![AVL](https://github.com/anamariaaccilio/BD2_Project1/blob/main/images/sequentialfile/avl.png)
 
 - *Métodos importantes*
   1. Record find: Busca un registro en el árbol AVL según una clave dada.
