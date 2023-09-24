@@ -210,7 +210,7 @@ En este proyecto, utilizamos esta técnica para guardar datos de manera simple y
             rebuild();
         }
 
-      }
+        }
       ```
   2. remove_(const string& key): Elimina un registro del archivo de datos. Realiza una búsqueda binaria para encontrar la posición del registro y marca su puntero como -1 para indicar que está eliminado. Luego, realiza una reconstrucción del archivo de datos para eliminar los registros marcados como eliminados.
      ```cpp
@@ -277,7 +277,7 @@ En este proyecto, utilizamos esta técnica para guardar datos de manera simple y
          - Tomar en cuenta que se tiene que modificar el rebuild para que si lee un -1 en un registro_datafile,
            que no lo agregue al nuevo datafile
          */
-      };
+          };
 
      ```
   3. search(const string& key): Busca registros por su nombre en el archivo de datos y el archivo auxiliar y devuelve una lista de registros que coinciden con el nombre proporcionado.
@@ -359,7 +359,7 @@ En este proyecto, utilizamos esta técnica para guardar datos de manera simple y
         }
 
 
-      }
+        }
       ```
   4. rangeSearch(const string& begin, const string& end): Realiza una búsqueda de rango en el archivo de datos y devuelve registros cuyos nombres estén en el rango especificado.
      ```cpp
@@ -443,7 +443,7 @@ En este proyecto, utilizamos esta técnica para guardar datos de manera simple y
 
         return result;
 
-      }
+        }
 
      ```
   5. rebuild(): Este método se utiliza para reconstruir el archivo de datos principal. Elimina registros marcados como eliminados y reorganiza los registros válidos.
