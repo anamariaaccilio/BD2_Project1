@@ -46,18 +46,25 @@
 En este proyecto, implementaremos y manipularemos técnicas de organización de archivos en memoria secundaria, conjuntamente con un parser de código SQL para ejecutar sentencias.
 
 ## Objetivo del proyecto
-
 ### Principal
-La organización física de archivos en memoria secundaria es la base para la creación y utilización de los diferentes sistemas de gestión de bases de datos (DBMS). En un entorno cada vez más orientado hacia la información, la estructuración eficiente de los archivos en memoria secundaria es esencial para garantizar la integridad, disponibilidad y rendimiento de los datos almacenados. Nuestro proyecto esta orientado a aplicar diferentes técnicas de organización de archivos como son las de **Sequential File Organization**, **AVL File Organization** y **Extendible Hashing** para la gestión de registros en memoria secundaria. Asimismo se implementarán operaciones en los registros de forma eficiente, el cual se mostrará a través de una GUI para hacer consultas con sentencias SQL.
+- La organización física de archivos en memoria secundaria es la base para la creación y utilización de los diferentes sistemas de gestión de bases de datos (DBMS). En un entorno cada vez más orientado hacia la información, la estructuración eficiente de los archivos en memoria secundaria es esencial para garantizar la integridad, disponibilidad y rendimiento de los datos almacenados. Nuestro proyecto esta orientado a aplicar diferentes técnicas de organización de archivos como son las de **Sequential File Organization**, **AVL File Organization** y **Extendible Hashing** para la gestión de registros en memoria secundaria.
 
-## Secundario
+### Secundarios
+- Implementar operaciones en los registros de forma eficiente, a través de una GUI para hacer consultas con sentencias SQL.
+- Identificar las ventajas y desventajas de cada técnica de organización.
 
 ## Dominio de datos
 - NYC Traffic Volume
 - Twitter Bitcoin
 
 ## Resultados esperados
-Se busca obtener una optimización significativa de los tiempos de inserción y consulta de registros en nuestro sistema. Con Sequential File, anticipamos una aceleración en la inserción ordenada de registros, lo que mejorará la eficiencia en la consulta secuencial y búsqueda binaria. Por otro lado, la estructura de árbol AVL permitirá búsquedas en tiempo logarítmico en base a la cantidad de registros en el archivo, beneficiando las consultas por llave primaria. Finalmente, el uso de extendible hashing agilizará la inserción y consulta de registros distribuyendo eficientemente los datos en bloques de almacenamiento en base a una funcion hash. En conjunto, esperamos reducir significativamente los tiempos de respuesta para diferentes tipos de consultas en base a las diferentes técnicas de indexación usadas.
+
+Se busca obtener una optimización significativa de los tiempos de inserción y consulta de registros en nuestro sistema a través de los accesos a memoria secundaria. 
+- Con `Sequential File`, anticipamos una aceleración en la inserción ordenada de registros, lo que mejorará la eficiencia en la consulta secuencial y búsqueda binaria.
+- La estructura de árbol `AVL` permitirá búsquedas en tiempo logarítmico en base a la cantidad de registros en el archivo, beneficiando las consultas por llave primaria.
+- El uso de `Extendible hashing` agilizará la inserción y consulta de registros distribuyendo eficientemente los datos en bloques de almacenamiento en base a una funcion hash.
+
+
 
 # Técnicas utilizadas
 ## Técnicas de indexación
