@@ -1,35 +1,14 @@
+#ifndef AVL_H
+#define AVL_H
+
 #include <iostream>
 #include <fstream>
 #include <cstring>
 #include <climits>
 #include <vector>
+#include "Record.h"
 
 using namespace std;
-struct Record
-{
-    int cod;
-    char nombre[12];
-    int ciclo;
-    long left = -1, right = -1;
-    int height = 0;
-
-    void setData(){
-        cout << "Codigo:";
-        cin >> cod;
-        cout << "Nombre: ";
-        cin >> nombre;
-        cout << "Ciclo: ";
-        cin >> ciclo;
-    }
-
-    void showData(){
-        //cout << "\nCodigo: " << cod;
-        //cout << "\nNombre: " << nombre;
-        //cout << "\nCiclo : " << ciclo <<endl;
-        cout << cod << " " << nombre << " " << ciclo << endl;
-    }
-
-};
 
 class AVLFile
 {
@@ -37,9 +16,9 @@ private:
     string filename;
     long pos_root;
 public:
-    AVLFile(string filename){
+    AVLFile(string _filename){
         this->pos_root = 0;
-        this->filename = filename;
+        this->filename = path + _filename + ".bin";
 
         ifstream file(filename, ios::app | ios::binary);
 
@@ -51,13 +30,23 @@ public:
 
     }
 
-    Record find(int key){
+    template<class TK>
+    Record find(TK key){
         ifstream file(filename, ios::binary);
-        return find(pos_root, key, file);
+        Record record = find(pos_root, key, file);
         file.close();
+        return record;
     }
 
-    void insert(Record record){
+    template<class TK>
+    vector<Record> search(TK key){
+        ifstream file(filename, ios::binary);
+        vector<Record> records = search(pos_root, key, file);
+        file.close();
+        return records;
+    }
+
+    void add(Record record){
         fstream f(this->filename, ios::in | ios::out | ios::binary);
         insert(pos_root, record, f);
         f.close();
@@ -74,16 +63,49 @@ public:
         return inorder(pos_root);
     }
 
-    //searchrange 
-
-
-    vector<Record> searchRange(int start, int end, int i, vector<struct Record> vector) {
-        std::vector<Record> result;
-        searchRange(pos_root, start, end, result);
-        return result;
+    template<class TK>
+    vector<Record> rangeSearch(TK begin, TK end){
+        vector<Record> results = RangeSearch(pos_root, begin, end);
+        return results;
     }
 
 private:
+
+    template<class TK>
+    vector<Record> RangeSearch(long pos_node, const TK& begin, const TK& end) {
+        vector<Record> result;
+
+        if (pos_node != -1) {
+            ifstream file(filename, ios::binary);
+            Record record;
+            file.seekg(pos_node, ios::beg);
+            file.read((char*)&record, sizeof(Record));
+
+            if (record.getKey() >= begin) {
+                vector<Record> leftSubtree = RangeSearch(record.left, begin, end);
+                result.insert(result.end(), leftSubtree.begin(), leftSubtree.end());
+
+                if (record.getKey() <= end) {
+                    result.push_back(record);
+                }
+
+                if (record.getKey() < end) {
+                    vector<Record> rightSubtree = RangeSearch(record.right, begin, end);
+                    result.insert(result.end(), rightSubtree.begin(), rightSubtree.end());
+                }
+            } else {
+                // Si el registro actual está antes del rango, solo exploramos el subárbol derecho.
+                vector<Record> rightSubtree = RangeSearch(record.right, begin, end);
+                result.insert(result.end(), rightSubtree.begin(), rightSubtree.end());
+            }
+
+            file.close();
+        }
+
+        return result;
+    }
+
+
     vector<Record> inorder(long pos_node){
         vector<Record> result;
 
@@ -107,33 +129,31 @@ private:
         return result;
     }
 
-    Record find(long pos_node, int key, ifstream& file){
+
+    template<class TK>
+    vector<Record> search(long pos_node, TK key, ifstream& file){
+        vector<Record> found;
+
         Record record;
         file.seekg(pos_node, ios::beg);
         file.read((char*)&record, sizeof(Record));
 
-        if (record.cod == key) {
-            return record;
-        } else {
-            if (key > record.cod) {
-                if (record.right != -1) {
-                    return find(record.right, key, file);
-                } else {
-                    Record notFoundRecord;
-                    notFoundRecord.cod = -1;
-                    return notFoundRecord;
-                }
-            } else if (key < record.cod) {
-                if (record.left != -1) {
-                    return find(record.left, key, file);
-                } else {
-                    Record notFoundRecord;
-                    notFoundRecord.cod = -1;
-                    return notFoundRecord;
-                }
-            }
+        if (record.getKey() == key) {
+            found.push_back(record);
         }
+
+        if (key > record.getKey() && record.right != -1) {
+            vector<Record> rightResults = search(record.right, key, file);
+            found.insert(found.end(), rightResults.begin(), rightResults.end());
+        } else if (key < record.getKey() && record.left != -1) {
+            vector<Record> leftResults = search(record.left, key, file);
+            found.insert(found.end(), leftResults.begin(), leftResults.end());
+        }
+
+        return found;
     }
+
+
 
     void insert(long pos_node, Record record, fstream& file){
         file.seekg(0, ios::end);
@@ -146,7 +166,7 @@ private:
         file.seekg(pos_node, ios::beg);
         file.read((char*)&curr_record, sizeof(Record));
 
-        if(record.cod < curr_record.cod){
+        if(record.getKey() < curr_record.getKey()){
             if(curr_record.left == -1){
                 file.seekp(0, ios::end);
                 curr_record.left = file.tellg();
@@ -156,7 +176,7 @@ private:
             }
             else
                 insert(curr_record.left, record, file);
-        }else if(record.cod > curr_record.cod){
+        }else if(record.getKey() > curr_record.getKey()){
             if(curr_record.right == -1){
                 file.seekp(0, ios::end);
                 curr_record.right = file.tellg();
@@ -173,86 +193,26 @@ private:
 
     }
 
-    //complete
-
-    template <class T>
-    void remove(long pos_node, T key, fstream& file){
+    template <class TK>
+    void remove(long pos_node, TK key, fstream& file){
         if(pos_node == -1)
             return;
+
         Record curr_record;
-        file.seekg(pos_node, ios::beg);
+        long curr_pos = pos_node;
+        file.seekg(curr_pos, ios::beg);
         file.read((char*)&curr_record, sizeof(Record));
 
-        if(key < curr_record.cod)
+        if(key < curr_record.getKey())
             remove(curr_record.left, key, file);
-        else if(key > curr_record.cod)
+        else if(key > curr_record.getKey())
             remove(curr_record.right, key, file);
         else{
-            if(curr_record.left == -1 && curr_record.right == -1){
-                curr_record.cod = -1;
-                file.seekp(pos_node, ios::beg);
-                file.write((char*)&curr_record, sizeof(Record));
-            }
-            else if(curr_record.left == -1){
-                Record right_record;
-                file.seekg(curr_record.right, ios::beg);
-                file.read((char*)&right_record, sizeof(Record));
-                curr_record.cod = right_record.cod;
-                curr_record.right = right_record.right;
-                curr_record.left = right_record.left;
-                file.seekp(pos_node, ios::beg);
-                file.write((char*)&curr_record, sizeof(Record));
-            }
-            else if(curr_record.right == -1){
-                Record left_record;
-                file.seekg(curr_record.left, ios::beg);
-                file.read((char*)&left_record, sizeof(Record));
-                curr_record.cod = left_record.cod;
-                curr_record.right = left_record.right;
-                curr_record.left = left_record.left;
-                file.seekp(pos_node, ios::beg);
-                file.write((char*)&curr_record, sizeof(Record));
-            }
-            else{
-                Record left_record;
-                file.seekg(curr_record.left, ios::beg);
-                file.read((char*)&left_record, sizeof(Record));
-                curr_record.cod = left_record.cod;
-                curr_record.right = left_record.right;
-                curr_record.left = left_record.left;
-                file.seekp(pos_node, ios::beg);
-                file.write((char*)&curr_record, sizeof(Record));
-                remove(curr_record.left, left_record.cod, file);
 
-            }
         }
-        updateHeight(pos_node, file);
-        balance(pos_node, file);
-
     }
 
-    //searchrange
-
-    void searchRange(long pos_node, int start, int end, vector<Record>& result, ifstream& file){
-        if(pos_node == -1)
-            return;
-        Record curr_record;
-        file.seekg(pos_node, ios::beg);
-        file.read((char*)&curr_record, sizeof(Record));
-
-        if(curr_record.cod >= start && curr_record.cod <= end){
-            result.push_back(curr_record);
-            searchRange(curr_record.left, start, end, result, file);
-            searchRange(curr_record.right, start, end, result, file);
-        }
-        else if(curr_record.cod < start)
-            searchRange(curr_record.right, start, end, result, file);
-        else if(curr_record.cod > end)
-            searchRange(curr_record.left, start, end, result, file);
-    }
-
-    // AVL
-
+    /// AVL
     int height(long pos_node, fstream& file){
         if(pos_node == -1)
             return -1;
@@ -357,30 +317,7 @@ private:
         updateHeight(pos_temp, file);
     }
 
-
 };
 
-void writeFile(string filename){
-    AVLFile file(filename);
-    Record record;
-    for (int i = 0; i < 1; i++)
-    {
-        record.setData();
-        file.insert(record);
-    }
-}
 
-void readFile(string filename){
-    AVLFile file(filename);
-    cout<<"--------- show all sorted data -----------\n";
-    vector<Record> result = file.inorder();
-    for(Record re : result){
-        re.showData();
-    }
-}
-
-int main() {
-    writeFile("data.bin");
-    readFile("data.bin");
-    return 0;
-}
+#endif // AVL_H

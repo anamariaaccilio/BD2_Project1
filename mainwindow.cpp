@@ -62,8 +62,8 @@ void MainWindow::on_send_clicked()
     string query = input.toStdString();
 
     ui->tabla->setRowCount(0);
-    ui->tabla->setColumnCount(3);
-    ui->tabla->setHorizontalHeaderLabels({"Nombre", "Carrera", "Ciclo"});
+    ui->tabla->setColumnCount(7);
+    ui->tabla->setHorizontalHeaderLabels({"id", "district", "year", "month", "day", "vol", "street"});
 
     vector<Record> records;
 
@@ -76,12 +76,21 @@ void MainWindow::on_send_clicked()
     highlightReservedWords(_query);
 
     for (const auto &elem : records) {
-        QString nombre = QString::fromStdString(elem.getKey());
-        QString carrera = QString::fromStdString(elem.get_carrera());
+        QString id = QString::number(elem.getKey());
+        QString district = QString::fromStdString(elem.district);
+        QString year = QString::number(elem.year);
+        QString month = QString::number(elem.month);
+        QString day = QString::number(elem.day);
+        QString vol = QString::number(elem.vol);
+        QString street = QString::fromStdString(elem.get_street());
         ui->tabla->insertRow(rowCount);
-        ui->tabla->setItem(ui->tabla->rowCount()-1, 0, new QTableWidgetItem(nombre));
-        ui->tabla->setItem(ui->tabla->rowCount()-1, 1, new QTableWidgetItem(carrera));
-        ui->tabla->setItem(ui->tabla->rowCount()-1, 2, new QTableWidgetItem(QString::number(elem.get_ciclo())));
+        ui->tabla->setItem(ui->tabla->rowCount()-1, 0, new QTableWidgetItem(id));
+        ui->tabla->setItem(ui->tabla->rowCount()-1, 1, new QTableWidgetItem(district));
+        ui->tabla->setItem(ui->tabla->rowCount()-1, 2, new QTableWidgetItem(year));
+        ui->tabla->setItem(ui->tabla->rowCount()-1, 3, new QTableWidgetItem(month));
+        ui->tabla->setItem(ui->tabla->rowCount()-1, 4, new QTableWidgetItem(day));
+        ui->tabla->setItem(ui->tabla->rowCount()-1, 5, new QTableWidgetItem(vol));
+        ui->tabla->setItem(ui->tabla->rowCount()-1, 6, new QTableWidgetItem(street));
         rowCount++;
     }
 

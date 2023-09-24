@@ -1,11 +1,11 @@
-#include <iostream>
-#include <filesystem>
-#include <string>
-#include <vector>
-#include <fstream>
-#include <sstream>
+#include "mainwindow.h"
 
-int main(){
+#include <QApplication>
 
-    return 0;
+int main(int argc, char *argv[])
+{
+    QApplication a(argc, argv);
+    MainWindow w;
+    w.show();
+    return a.exec();
 }

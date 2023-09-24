@@ -1,3 +1,0 @@
-C:/Users/ACER/Documents/V CICLO/BD2/BD2_Project1/cmake-build-debug/CMakeFiles/BD2_Project1.dir
-C:/Users/ACER/Documents/V CICLO/BD2/BD2_Project1/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/ACER/Documents/V CICLO/BD2/BD2_Project1/cmake-build-debug/CMakeFiles/rebuild_cache.dir

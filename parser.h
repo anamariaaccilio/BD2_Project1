@@ -8,6 +8,7 @@
 #include <string>
 #include <fstream>
 #include <map>
+#include <chrono>
 #include <cctype>
 #include <vector>
 #include <initializer_list>
@@ -18,7 +19,7 @@
 using namespace std;
 
 template <class STR>
-void readCSVFile(const string& filename, STR structure) {
+void readCSVFile(const string& filename, STR& structure) {
     ifstream file(filename);
 
     if (!file.is_open()) {
@@ -26,25 +27,30 @@ void readCSVFile(const string& filename, STR structure) {
     }
 
     string line;
-    getline(file, line);
+    getline(file, line); // Leer la primera línea (encabezados) y descartarla
 
     while (getline(file, line)) {
-        char nombre[30];
-        char carrera[20];
-        int ciclo;
+        istringstream ss(line);
+        string id_str, district, year_str, month_str, day_str, vol_str, street;
 
-        if (sscanf(line.c_str(), "%29[^,],%19[^,],%d", nombre, carrera, &ciclo) != 3) {
-            cerr << "Error: Formato de archivo CSV incorrecto en línea: " << line << endl;
-                continue;
+        if (getline(ss, id_str, ',') && getline(ss, district, ',') &&
+            getline(ss, year_str, ',') && getline(ss, month_str, ',') &&
+            getline(ss, day_str, ',') && getline(ss, vol_str, ',') &&
+            getline(ss, street, ',')) {
+            Record record;
+            record.id = stoi(id_str);
+            strncpy(record.district, district.c_str(), sizeof(record.district));
+            record.year = stoi(year_str);
+            record.month = stoi(month_str);
+            record.day = stoi(day_str);
+            record.vol = stoi(vol_str);
+            strncpy(record.street, street.c_str(), sizeof(record.street));
+
+            structure.add(record);
+
+        } else {
+            cerr << "Error al analizar la línea: " << line << endl;
         }
-
-        Record record;
-        strcpy(record.nombre, nombre);
-        strcpy(record.carrera, carrera);
-        record.ciclo = ciclo;
-
-        structure.add(record);
-
     }
 
     file.close();
@@ -383,44 +389,12 @@ private:
             if(currentToken->type == Token::END){
                 if(previousToken->lexema == "SEQUENTIAL" or previousToken->lexema == "sequential"){
                     SequentialFile f(tabla);
-                    found = f.search(value);
+                    found = f.search(stoi(value));
                 }else if(previousToken->lexema == "AVL" or previousToken->lexema == "avl"){
                     AVLFile f(tabla);
-                    found = f.search(value);
+                    found = f.search(stoi(value));
                 }
             }
-            return found;
-        }else if(previousToken->type == Token::GT){
-            string value;
-            expect({Token::NUM, Token::ID});
-            value = previousToken->lexema;
-            expect(Token::USING);
-            expect(Token::CAMPO);
-            cout << "MAYOR A " << endl;
-            return found;
-        }else if(previousToken->type == Token::GE){
-            string value;
-            expect({Token::NUM, Token::ID});
-            value = previousToken->lexema;
-            expect(Token::USING);
-            expect(Token::CAMPO);
-            cout << "MAYOR IGUAL A" << endl;
-            return found;
-        }else if(previousToken->type == Token::LT){
-            string value;
-            expect({Token::NUM, Token::ID});
-            value = previousToken->lexema;
-            expect(Token::USING);
-            expect(Token::CAMPO);
-            cout << "MENOR A" << endl;
-            return found;
-        }else if(previousToken->type == Token::LE){
-            string value;
-            expect({Token::NUM, Token::ID});
-            value = previousToken->lexema;
-            expect(Token::USING);
-            expect(Token::CAMPO);
-            cout << "MENOR IGUAL A" << endl;
             return found;
         }else if(previousToken->type == Token::BETWEEN){
             string begin, end;
@@ -435,10 +409,10 @@ private:
             expect(Token::CAMPO);
             if(previousToken->lexema == "AVL" or previousToken->lexema == "avl"){
                 AVLFile f(tabla);
-                found = f.rangeSearch(begin, end);
+                found = f.rangeSearch(stoi(begin), stoi(end));
             }else if(previousToken->lexema == "SEQUENTIAL" or previousToken->lexema == "sequential"){
                 SequentialFile f(tabla);
-                found = f.rangeSearch(begin, end);
+                found = f.rangeSearch(stoi(begin), stoi(end));
             }
 
             return found;
@@ -466,25 +440,13 @@ private:
         expect(Token::RPAREN);
         if(currentToken->type == Token::END){
             if(index == "AVL" or index == "avl"){
-                ifstream file(tabla);
-                if(file.good()){
-                    cout << "Tabla ya existente";
-                    return;
-                }
-                file.close();
                 AVLFile indice(tabla);
                 readCSVFile<AVLFile>(filename, indice);
-                cout << "Tabla creada con nombre " << tabla;
+                cout << "Tabla creada con nombre " << tabla << endl;
             }else if(index == "SEQUENTIAL" or index == "sequential"){
-                ifstream file(tabla);
-                if(file.good()){
-                    cout << "Tabla ya existente";
-                    return;
-                }
-                file.close();
                 SequentialFile indice(tabla);
                 readCSVFile<SequentialFile>(filename, indice);
-                cout << "Tabla creada con nombre " << tabla;
+                cout << "Tabla creada con nombre " << tabla << endl;
             }else{
                 cout << "Indice no existente";
             }
@@ -501,14 +463,26 @@ private:
         tabla = previousToken->lexema;
         expect(Token::VALUES);
         expect(Token::LPAREN);
-        expect(Token::ID);
-        strncpy(record.nombre, previousToken->lexema.c_str(), sizeof(record.nombre));
+        expect(Token::NUM);
+        record.id = stoi(previousToken->lexema);
         expect(Token::COMA);
         expect(Token::ID);
-        strncpy(record.carrera, previousToken->lexema.c_str(), sizeof(record.carrera));
+        strncpy(record.district, previousToken->lexema.c_str(), sizeof(record.district));
         expect(Token::COMA);
         expect(Token::NUM);
-        record.ciclo = stoi(previousToken->lexema);
+        record.year = stoi(previousToken->lexema);
+        expect(Token::COMA);
+        expect(Token::NUM);
+        record.month = stoi(previousToken->lexema);
+        expect(Token::COMA);
+        expect(Token::NUM);
+        record.day = stoi(previousToken->lexema);
+        expect(Token::COMA);
+        expect(Token::NUM);
+        record.vol = stoi(previousToken->lexema);
+        expect(Token::COMA);
+        expect(Token::ID);
+        strncpy(record.street, previousToken->lexema.c_str(), sizeof(record.street));
         expect(Token::RPAREN);
         expect(Token::USING);
         expect(Token::CAMPO);
@@ -539,32 +513,17 @@ private:
             string value;
             expect({Token::NUM, Token::ID, Token::BOOL});
             value = previousToken->lexema;
-            cout << "IGUAL A" << endl;
-            return;
-        }else if(previousToken->type == Token::GT){
-            string value;
-            expect({Token::NUM, Token::ID});
-            value = previousToken->lexema;
-            cout << "MAYOR A " << endl;
-            return;
-        }else if(previousToken->type == Token::GE){
-            string value;
-            expect({Token::NUM, Token::ID});
-            value = previousToken->lexema;
-            cout << "MAYOR IGUAL A" << endl;
-            return;
-        }else if(previousToken->type == Token::LT){
-            string value;
-            expect({Token::NUM, Token::ID});
-            value = previousToken->lexema;
-            cout << "MENOR A" << endl;
-            return;
-        }else if(previousToken->type == Token::LE){
-            string value;
-            expect({Token::NUM, Token::ID});
-            value = previousToken->lexema;
-            cout << "MENOR IGUAL A" << endl;
-            return;
+            expect(Token::USING);
+            expect(Token::CAMPO);
+            if(currentToken->type == Token::END){
+                if(previousToken->lexema == "SEQUENTIAL" or previousToken->lexema == "sequential"){
+                    SequentialFile f(tabla);
+                    f.remove(stoi(value));
+                }else if(previousToken->lexema == "AVL" or previousToken->lexema == "avl"){
+                    AVLFile f(tabla);
+                    f.remove(stoi(value));
+                }
+            }
         }else if(previousToken->type == Token::BETWEEN){
             string begin, end;
             expect(Token::LPAREN);
