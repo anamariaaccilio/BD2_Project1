@@ -137,6 +137,84 @@ if(analyzeFloat(X.Puntero)=="Auxiliar"){
        }
 ```
 
+En caso queramos insertar un elemento que sea posterior alfabéticamente a Y. Siendo Y el unico elemento que por el momento pertenece al grupo de sucesores de X en el AUXILIAR.  En el ejemplo, nos damos cuenta que Nando va después que Azucena en el DATA, pero Azucena apunta a un elemento que pertenece al AUXILIAR, en este caso Manuel. Ya en el AUXILIAR preguntamos si “record” (Nando) va despues que Manuel, y la respuesta es SI, pero observamos que Manuel ya no apunta a ningun otro elemento, por lo que tendremos que insertar “record” después que Manuel.
+
+```cpp
+//Si record va despues que Y
+       if (cmp > 0){
+           if (analyzeFloat(Y.Puntero) == "Data"){
+               record.Puntero = Y.Puntero;
+               writeRecordEND(record, this->aux_file);
+               updatePunteroAtPosition(X.Puntero, aux_size, this->aux_file); // X -> pos(record)
+               //No olvidarse de aumentar la cantidad de elementos que hay en el auxiliar.bin
+               aux_size += 1;
+           }
+```
+**(Si tanto X como Y ahora pertenecen al archivo AUXILIAR)** En caso Y no sea el único elemento que  pertenece al grupo de sucesores de X en el AUXILIAR, posiblemente tengamos que movernos de puntero en puntero dentro del AUXILIAR hasta que encontremos al mejor candidato a antecesor de “record”. 
+
+- Lo que vamos a hacer es movernos según los punteros (osea en el orden alfabético) preguntando si nuestro “record” va despues que el elemento i. En caso la respuesta sea SI el nuevo elemento i va a ser el i+1.
+  
+```cpp
+//Ahora si tanto X como Y pertenecen a auxiliar file
+           else {
+               bool posicionado = false;
+               int cmp2;
+               while(!posicionado){
+
+                   X_pos = X.Puntero; //X_pos = Y_pos
+                   X = readRecord(X_pos,this->aux_file);
+
+                   //Y_pos = X.Puntero
+                   Y = readRecord(X.Puntero,this->aux_file);
+
+                   cmp2 = record.compare(Y);
+						/*
+
+                    En caso record vaya despues que Y pero Y apunta a otro elemento perteneciente a auxixiliar.bin
+                    (osea no se ha llegao al final)
+
+                    Se repite el while y con ello
+                    -  X pasa a ser Y(1)
+                    -  Y pasa a ser el Y(1).Puntero
+
+            */
+```
+
+Vamos a dejar de movernos de puntero en puntero bajo dos condiciones:
+
+- Si detectamos que “record” esta antes que algún Y.
+```cpp
+				  			//Si record va antes que Y
+                   if (cmp2 <= 0){
+                       //Agregamos el record al aux y hacemos el cambiaso de punteros entre X y record
+                       record.Puntero = X.Puntero; //record -> X.Puntero
+                       writeRecordEND(record, this->aux_file);
+                       updatePunteroAtPosition(X_pos, aux_size, this->aux_file); // X -> pos(record)
+
+                       //No olvidarse de aumentar la cantidad de elementos que hay en el auxiliar.bin
+                       aux_size += 1;
+
+                       posicionado = true;
+                   }
+```
+En este caso nos hemos movido de puntero en puntero hasta que nos percatamos que Monarca (”record”) esta antes que Nando (Y), por lo que lo insertamos antes que Nando.
+
+- O si detectamos que que “record” va después que algún Y, pero este Y apunta a un elemento perteneciente al DATA FILE, es decir Y ya no apunta a otro elemento que vaya después que él (alfabéticamente) en el AUX FILE.
+```cpp
+ 	            //Si record va despues que Y, y este Y apunta a un elemento perteneciente a data.file (osea que ya no apunta a ningun otro elemento)
+                   if (cmp2 > 0 && analyzeFloat(Y.Puntero)=="Data"){
+
+                       record.Puntero = Y.Puntero;
+                       writeRecordEND(record, this->aux_file);
+                       updatePunteroAtPosition(X.Puntero/*Y_pos*/, aux_size, this->aux_file);
+
+                       //No olvidarse de aumentar la cantidad de elementos que hay en el auxiliar.bin
+                       aux_size += 1;
+
+                       posicionado = true;
+                   }
+```
+
 
 
   2. remove_(const string& key): Elimina un registro del archivo de datos. Realiza una búsqueda binaria para encontrar la posición del registro y marca su puntero como -1 para indicar que está eliminado. Luego, realiza una reconstrucción del archivo de datos para eliminar los registros marcados como eliminados.
