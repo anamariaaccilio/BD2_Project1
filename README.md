@@ -1031,6 +1031,30 @@ Asimismo, implementaremos un **Parser con SQL** y un **GUI** con **QT** para la 
 
 - [AVL](https://github.com/anamariaaccilio/BD2_AVL)
 - [Extendible Hashing](https://github.com/anamariaaccilio/BD2_AVL)
+  ### Complejidad según los accesos a memoria secundaria - Extendible Hashing
+  Ya que D y FB son constantes siempre tenemos el analisis de la siguiente forma:
+  | Operación      | Explicación                                                                                                      | Complejidad  |
+|----------------|------------------------------------------------------------------------------------------------------------------|--------------|
+| **Insertion**  | Búsqueda en el índice (lectura en memoria secundaria): O(1) en promedio.                                      | O(1) en promedio   |
+|                | Lectura del bucket existente (lectura en memoria secundaria): O(1) en promedio.                               |                |
+|                | Inserción en el bucket (escritura en memoria secundaria): O(1) en promedio.                                  |                |
+|                | Actualización del bucket (escritura en memoria secundaria): O(1) en promedio.                                |                |
+|                | Actualización del índice (escritura en memoria secundaria): O(1) en promedio.                                |                |
+| **Search**     | Búsqueda en el índice (lectura en memoria secundaria): O(1) en promedio.                                      | O(1) en promedio   |
+|                | Lectura del bucket existente (lectura en memoria secundaria): O(1) en promedio.                               |                |
+|                | Búsqueda secuencial en el bucket (lectura en memoria secundaria): O(FB) en el peor caso.                    |                |
+| **Remove**     | Búsqueda en el índice (lectura en memoria secundaria): O(1) en promedio.                                      | O(1) en promedio   |
+|                | Lectura del bucket existente (lectura en memoria secundaria): O(1) en promedio.                               |                |
+|                | Búsqueda y actualización secuencial en el bucket (lectura y escritura en memoria secundaria): O(FB) en el peor caso. |                |
+|                | Actualización del bucket (escritura en memoria secundaria): O(1) en promedio.                                |                |
+|                | Actualización del índice (escritura en memoria secundaria): O(1) en promedio.                                |                |
+| **Rebuild**    | Lectura de todos los registros en el archivo de datos (lectura en memoria secundaria): O(n).                 | O(n)           |
+|                | Creación de nuevos buckets (escritura en memoria secundaria): O(n).                                           |                |
+|                | Actualización del índice (escritura en memoria secundaria): O(1) en promedio para cada entrada de índice.    |                |
+|                | Actualización de `posBuckets` (escritura en memoria secundaria): O(1) en promedio para cada entrada.         |                |
+
+  
+
 - [Sequential](https://github.com/anamariaaccilio/BD2_AVL)
 
 ### Complejidad según los accesos a memoria secundaria - Sequential File
