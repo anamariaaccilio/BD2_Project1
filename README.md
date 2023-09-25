@@ -57,8 +57,14 @@ En este proyecto, implementaremos y manipularemos técnicas de organización de 
 
 - NYC Traffic Volume
 
-Utilizamos una `dataset` de 
-  
+Utilizamos una `DataSet` de Recuentos automatizados del volumen de tráfico de la ciudad de Nueva York. El Departamento de Transporte de la ciudad de Nueva York (NYC DOT) utiliza registradores de tráfico automatizados (ATR) para recopilar muestras de recuentos de volumen de tráfico en cruces de puentes y carreteras.  
+
+La lección de datos fue debido a los siguientes factores:
+- Los atributos son de tipo `int` y `char`.
+- Hicimos limpieza de datos, por lo que no contamos con celdas `NULL` o caracteres `no ASCII`.
+- La DataSet cuenta con más de 1000 000 de registros y 7 atributos.
+- La llave es única, en este caso trabajamos con el `id`.
+
 ```cpp
 struct Record
 {
