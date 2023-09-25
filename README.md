@@ -54,8 +54,10 @@ En este proyecto, implementaremos y manipularemos técnicas de organización de 
 - Identificar las ventajas y desventajas de cada técnica de organización.
 
 ## Dominio de datos
+
 - NYC Traffic Volume
-- Twitter Bitcoin
+
+Utilizamos una `dataset` de 
   
 ```cpp
 struct Record
@@ -69,6 +71,17 @@ struct Record
     char street[30];
 }
 ```
+
+|    **Campo**    |                            **Descripción**                                          | 
+|:---------------:|:-----------------------------------------------------------------------------------:|
+| ```id```        |             Un ID único que se genera para cada solicitud de recuento               |  
+| ```district```  | En cuál de las divisiones administrativas de Nueva York se encuentra la ubicación | 
+| ```year``` | El año de la fecha que se realizó el conteo | 
+| ```month``` | El mes de la fecha que se realizó el conteo |
+| ```day``` | El día de la fecha que se realizó el conteo|
+| ```vol``` | El volumen recopilado de incrementos en 15 minutos |
+| ```street``` | La calle donde se realizó el conteo |
+
 
 ## Resultados esperados
 
