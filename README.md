@@ -36,9 +36,9 @@
                <li><a href="#Consultas">Consultas</a></li>   
           </ul>
       </ul>
-    </a></li>
-    <li><a href="#Gráfico-Comprativo">Gráfico comparativo de las técnicas de indexación</a></li>
+    </a></li>    
     <li><a href="#Resultados-experimentales">Resultados experimentales</a></li>
+    <li><a href="#Gráfico-Comprativo">Gráfico comparativo de las técnicas de indexación</a></li>
     <li><a href="#Interfaz-gráfica">Interfaz gráfica</a></li>
     <li><a href="#conclusiones">Conclusiones</a></li>
     <li><a href="#Team-group5">Team - Group 5</a></li>
@@ -685,9 +685,14 @@ Asimismo, implementaremos un **Parser con SQL** y un **GUI** con **QT** para la 
 
 ## Análsis Comparativo - Conceptual
 
+- [AVL](https://github.com/anamariaaccilio/BD2_AVL)
+- [Extendible Hashing](https://github.com/anamariaaccilio/BD2_AVL)
+- [Sequential](https://github.com/anamariaaccilio/BD2_AVL)
 
 ## SQL Parser
+
 La implementación del parser para consultas SQL se ha llevado a cabo siguiendo un enfoque modular y escalable. En primer lugar, hemos desarrollado un scanner que se encarga de tokenizar los lexemas de una cadena de consulta SQL. Este scanner analiza la entrada de texto y divide la consulta en tokens significativos, como palabras clave **(SELECT, INSERT, DELETE, CREATE)**, identificadores **(Campos o ID's)**, operadores y valores. Una vez que tenemos estos tokens el parser se encarga de analizar secuencialmente estos tokens, siguiendo las reglas sintácticas del lenguaje SQL en base a la diferentes tipos de consultas que se quieren hacer. A medida que avanza, verifica la estructura y la coherencia de las consultas, asegurándose de que cumplan con la sintaxis requerida, por ejemplo, si se quiere hacer un **SELECT**, se le va pidiendo al scanner los siguientes tokens y con una funcion verificamos si es el token esperado para poder continuar, si todo es correcto se ejecutan las consultas.
+
 ### Consultas
 
 | **Consulta** | **Sentencia** | 
@@ -698,8 +703,28 @@ La implementación del parser para consultas SQL se ha llevado a cabo siguiendo 
 | `INSERT` |INSERT INTO table VALUES (value1,value2,...,valuen) |
 | `DELETE` | DELETE FROM table WHERE column = value |
 
-# Gráfico comparativo de las técnicas de indexación
+
 # Resultados experimentales
+
+Consultas respecto al índice en los registros de nuestra DataSet.
+
+```sql
+SELECT * FROM NYC_Traffic WHERE street = 'BRUCKNER BOULEVARD';
+```
+```sql
+SELECT * FROM NYC_Traffic WHERE street = 'BRUCKNER BOULEVARD';
+```
+```sql
+SELECT * FROM NYC_Traffic WHERE street = 'BRUCKNER BOULEVARD';
+```
+```sql
+SELECT * FROM NYC_Traffic WHERE street = 'BRUCKNER BOULEVARD';
+```
+
+
+# Gráfico comparativo de las técnicas de indexación
+
+Técnicas de indexación de archivos sobre el dominio de datos.
 
 ## Inserción
 
@@ -711,6 +736,7 @@ La implementación del parser para consultas SQL se ha llevado a cabo siguiendo 
 | 100000    | 257345 ms   | Celda 3,3    | Celda 1,3    |
 
 ## Busqueda
+
 | #Registros | AVL File | Sequential File | Extendible Hashing |
 |--------------|--------------|--------------|--------------|
 | 100   | 70 ms    | Celda 1,3    | Celda 1,3    |
@@ -718,8 +744,10 @@ La implementación del parser para consultas SQL se ha llevado a cabo siguiendo 
 | 10000    | 97575 ms    | Celda 3,3    | Celda 1,3    |
 | 100000    | 257345 ms   | Celda 3,3    | Celda 1,3    |
 
+
 # Interfaz gráfica
 La **GUI** fue diseñada en **QT**, ya que es un entorno de desarrollo integrado de fácil uso y más intutivo para los usuarios.
+
 ![GUI](GUI.png)
 
 # Conclusiones
