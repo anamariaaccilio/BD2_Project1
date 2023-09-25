@@ -736,10 +736,10 @@ Técnicas de indexación de archivos sobre el dominio de datos.
 ## Busqueda
 | #Registros | AVL File | Sequential File | Extendible Hashing |
 |--------------|--------------|--------------|--------------|
-| 100   | 0.0134 ms    | Celda 1,3    | Celda 1,3    |
-| 1000    | 0.0159 ms   | Celda 2,3    | Celda 1,3    |
-| 10000    | 0.0184 ms    | Celda 3,3    | Celda 1,3    |
-| 100000    | 0.0204 ms   | Celda 3,3    | Celda 1,3    |
+| 100   | 0.0134 ms    | Celda 1,3    | 0.0231 ms   |
+| 1000    | 0.0159 ms   | Celda 2,3    | 0.01791 ms   |
+| 10000    | 0.0184 ms    | Celda 3,3    |  0.01791 ms  |
+| 100000    | 0.0204 ms   | Celda 3,3    | 0.02941 ms   |
 
 
 # Interfaz gráfica
