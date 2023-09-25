@@ -1038,8 +1038,9 @@ Asimismo, implementaremos un **Parser con SQL** y un **GUI** con **QT** para la 
 |--------------|--------------|--------------|
 | **Insertion**  | O(1) en promedio. Busca en maximo FB en el bucket constante + C contante de division en funcion de D      | O(1) en promedio   |
 | **Search**     | Búsqueda en el índice. O(1) en promedio maximo se itera en FB constante                                     | O(1) en promedio   |
-| **Remove**     | Búsqueda en el índice (lectura en memoria secundaria): O(1) en promedio.                                      | O(1) en promedio   |
-| **Build**    | Lectura de todos los registros en el archivo de datos (lectura en memoria secundaria): O(n).                 | O(n)           |
+| **Remove**     | Búsqueda en el índice (lectura en memoria secundaria): O(1) en promedio. + constante en añadir a freelist  | O(1) en promedio   |
+| **Read**    | Lectura de todos los registros en el archivo de datos (lectura en memoria secundaria): O(n).                 | O(n)           |
+| **Build**    | Crea el archivo en funcion del D y FB, D para las secuencias de Bits y FB para inicializar los buckets.                 | O(1)           |
   
 
 - [Sequential](https://github.com/anamariaaccilio/BD2_AVL)
