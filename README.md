@@ -684,7 +684,7 @@ Para cada técnica de organización de archivos, se implementó las siguientes f
 
 Asimismo, implementaremos un **Parser con SQL** y un **GUI** con **QT** para la interfaz gráfica. 
 
-## Análsis Comparativo - Conceptual
+## Análisis Comparativo - Conceptual
 
 - [AVL](https://github.com/anamariaaccilio/BD2_AVL)
 - [Extendible Hashing](https://github.com/anamariaaccilio/BD2_AVL)
