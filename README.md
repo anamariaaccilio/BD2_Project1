@@ -716,16 +716,16 @@ La implementación del parser para consultas SQL se ha llevado a cabo siguiendo 
 Consultas respecto al índice en los registros de nuestra DataSet.
 
 ```sql
-SELECT * FROM NYC_Traffic WHERE street = 'BRUCKNER BOULEVARD';
+SELECT * FROM traffic WHERE id = 2240 USING AVL;
 ```
 ```sql
-SELECT * FROM NYC_Traffic WHERE street = 'BRUCKNER BOULEVARD';
+SELECT * FROM traffic WHERE id = 2240 USING HASH;
 ```
 ```sql
-SELECT * FROM NYC_Traffic WHERE street = 'BRUCKNER BOULEVARD';
+SELECT * FROM traffic WHERE id = 2240 USING SEQUENTIAL;
 ```
 ```sql
-SELECT * FROM NYC_Traffic WHERE street = 'BRUCKNER BOULEVARD';
+SELECT * FROM traffic WHERE id BETWEEN (2034,2960) USING AVL;
 ```
 
 
