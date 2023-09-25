@@ -700,14 +700,16 @@ La implementación del parser para consultas SQL se ha llevado a cabo siguiendo 
 
 # Gráfico comparativo de las técnicas de indexación
 # Resultados experimentales
+
 ## Inserción
-### Tiempo de ejecución
+
 | #Registros | AVL File | Sequential File | Extendible Hashing |
 |--------------|--------------|--------------|--------------|
 | 100   | 70 ms    | Celda 1,3    | Celda 1,3    |
 | 1000    | 1702 ms   | Celda 2,3    | Celda 1,3    |
 | 10000    | 97575 ms    | Celda 3,3    | Celda 1,3    |
 | 100000    | 257345 ms   | Celda 3,3    | Celda 1,3    |
+
 ## Busqueda
 | #Registros | AVL File | Sequential File | Extendible Hashing |
 |--------------|--------------|--------------|--------------|
@@ -722,7 +724,9 @@ La **GUI** fue diseñada en **QT**, ya que es un entorno de desarrollo integrado
 
 # Conclusiones
 
-
+- Al utilizar índices se optimizó las consultas sobre el dataset que superan los 1000 0000 registros, puesto que la gestión de estructuras de indexación en memoría secundaria fueron más rápidas.
+- La creación del índice AVL fue mayor respecto al Hash, debido a que se realizan rotaciones en la inserción de cada nodo del AVL.
+- ...
 
 
 # Referencias bibliográficas
