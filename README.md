@@ -25,7 +25,7 @@
               <li><a href="#Sequential-File">Sequential File</a></li> 
           </ul>
         <li><a href="#Operaciones-implementadas">Operaciones implementadas</a></li>
-        <li><a href="#Análisis-comparativo">Análisis comparativo</a></li>
+        <li><a href="#Análisis-comparativo">Análisis comparativo - Conceptual</a></li>
         <li><a href="#SQL-Parser">SQL Parser</a></li>
           <ul>
                <li><a href="#Consultas">Consultas</a></li>   
@@ -57,14 +57,15 @@ En este proyecto, implementaremos y manipularemos técnicas de organización de 
 
 - NYC Traffic Volume
 
-Utilizamos una `DataSet` de Recuentos automatizados del volumen de tráfico de la ciudad de Nueva York. El Departamento de Transporte de la ciudad de Nueva York (NYC DOT) utiliza registradores de tráfico automatizados (ATR) para recopilar muestras de recuentos de volumen de tráfico en cruces de puentes y carreteras.  
+Utilizamos un `DataSet` de Recuentos automatizados del volumen de tráfico de la ciudad de Nueva York. El Departamento de Transporte de la ciudad de Nueva York (NYC DOT) utiliza registradores de tráfico automatizados (ATR) para recopilar muestras de recuentos de volumen de tráfico en cruces de puentes y carreteras.  
 
 La lección de datos fue debido a los siguientes factores:
 - Los atributos son de tipo `int` y `char`.
 - Hicimos limpieza de datos, por lo que no contamos con celdas `NULL` o caracteres `no ASCII`.
-- La DataSet cuenta con más de 1000 000 de registros y 7 atributos.
-- La llave es única, en este caso trabajamos con el `id`.
+- El DataSet cuenta con más de 1000 000 de registros y 7 atributos.
+- El llave es única, en este caso trabajamos con el `id`.
 
+Estos son los atributos del DataSet: 
 ```cpp
 struct Record
 {
@@ -87,7 +88,6 @@ struct Record
 | ```day``` | El día de la fecha que se realizó el conteo|
 | ```vol``` | El volumen recopilado de incrementos en 15 minutos |
 | ```street``` | La calle donde se realizó el conteo |
-
 
 ## Resultados esperados
 
@@ -669,8 +669,7 @@ Finalmente, iteramos por arriba de la cota inferior y por abajo de la cota super
 
 ## Operaciones implementadas
 
-Para cada técnica de organización de archivos, se debe implementar y visualizar las siguientes funciones:
-
+Para cada técnica de organización de archivos, se implementó las siguientes funciones:
 
 - `vector<Registro> search(T key)`
 - `vector<Registro> rangeSearch(T begin-key, T end-key)` 
@@ -679,7 +678,9 @@ Para cada técnica de organización de archivos, se debe implementar y visualiza
 
 Asimismo, implementaremos un **Parser con SQL** y un **GUI** con **QT** para la interfaz gráfica. 
 
-## Análsis Comparativo 
+## Análsis Comparativo - Conceptual
+
+
 ## SQL Parser
 La implementación del parser para consultas SQL se ha llevado a cabo siguiendo un enfoque modular y escalable. En primer lugar, hemos desarrollado un scanner que se encarga de tokenizar los lexemas de una cadena de consulta SQL. Este scanner analiza la entrada de texto y divide la consulta en tokens significativos, como palabras clave **(SELECT, INSERT, DELETE, CREATE)**, identificadores **(Campos o ID's)**, operadores y valores. Una vez que tenemos estos tokens el parser se encarga de analizar secuencialmente estos tokens, siguiendo las reglas sintácticas del lenguaje SQL en base a la diferentes tipos de consultas que se quieren hacer. A medida que avanza, verifica la estructura y la coherencia de las consultas, asegurándose de que cumplan con la sintaxis requerida, por ejemplo, si se quiere hacer un **SELECT**, se le va pidiendo al scanner los siguientes tokens y con una funcion verificamos si es el token esperado para poder continuar, si todo es correcto se ejecutan las consultas.
 ### Consultas
