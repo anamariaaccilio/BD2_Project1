@@ -297,7 +297,6 @@ Ahora que identificamos nuestro X (antecesor más próximo a record según ASCII
 **Si X apunta a un elemento perteneciente al mismo data.bin** entonces insertaremos a “record” al final del archivo auxiliar.bin. Posteriormente, si X apuntaba a PosY (X → PosY) ahora “record” apuntará a PosY también (record → PosY), y X ahora apuntará a la posición en la que fue insertado “record” en el auxiliar.bin (X→PosRecord).
 
 ```cpp
-   
    if(analyzeFloat(X.Puntero)=="Data"){
        //Agregamos el record al aux y hacemos el cambiaso de punteros entre X y record
        record.Puntero = X.Puntero; //record -> X.Puntero
@@ -671,7 +670,14 @@ Finalmente, iteramos por arriba de la cota inferior y por abajo de la cota super
 
           }
 ```
-
+### Complejidad según los accesos a memoria secundaria - Sequential File
+| #Operación | Explicación | Complejidad |
+|--------------|--------------|--------------|
+| **Insertion**  | O(log n)-> Busqueda Binaria en DATA + O(k) -> Busqueda secuencial en AUX, pero como k es log(n)    | O(log n )    |
+| **Search**  | O(log n)-> Busqueda Binaria en DATA + O(k) -> Busqueda secuencial en AUX, pero como k es log(n)   | O(log n)    |
+| **Range Search**  | O(n+k)-> Rebuild() + O(log n) -> Busqueda Binaria en DATA    | O(n)    |
+| **Remove**  | O(n+k)→Rebuild() + O(log n)→Busqueda binaria en DATA + O(k) → Busqueda lineal en AUX, k = log(n)   | O(n)   |
+| **Rebuild**  | O(n -> recorrido lineal al DATA + k -> recorrido lineal al AUX), como k = log n → O(n + log(n))   | O(n)   |
 
 ## Operaciones implementadas
 
@@ -732,8 +738,8 @@ Técnicas de indexación de archivos sobre el dominio de datos.
 ### Inserción
 | #Registros | AVL File | Sequential File | Extendible Hashing |
 |--------------|--------------|--------------|--------------|
-| 100   | 68 ms    | Celda 1,3    | 529 ms    |
-| 1000    | 991 ms   | Celda 2,3    | 5355 ms    |
+| 100   | 68 ms    | 1044 ms    | 529 ms    |
+| 1000    | 991 ms   | 17390 ms    | 5355 ms    |
 | 10000    | 121139 ms    | Celda 3,3    | 53345 ms   |
 | 100000    | 146988 ms   | Celda 3,3    | 5342435 ms    |
 ### Busqueda
