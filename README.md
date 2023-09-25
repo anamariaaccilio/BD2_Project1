@@ -1034,7 +1034,12 @@ Asimismo, implementaremos un **Parser con SQL** y un **GUI** con **QT** para la 
   ### Complejidad según los accesos a memoria secundaria - Extendible Hashing
   Ya que D y FB son constantes siempre tenemos el analisis de la siguiente forma:
 
-
+| Operación | Explicación | Complejidad |
+|--------------|--------------|--------------|
+| **Insertion**  | O(1) en promedio. Busca en maximo FB en el bucket constante + C contante de division en funcion de D      | O(1) en promedio   |
+| **Search**     | Búsqueda en el índice. O(1) en promedio maximo se itera en FB constante                                     | O(1) en promedio   |
+| **Remove**     | Búsqueda en el índice (lectura en memoria secundaria): O(1) en promedio.                                      | O(1) en promedio   |
+| **Build**    | Lectura de todos los registros en el archivo de datos (lectura en memoria secundaria): O(n).                 | O(n)           |
   
 
 - [Sequential](https://github.com/anamariaaccilio/BD2_AVL)
