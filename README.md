@@ -1015,18 +1015,6 @@ Finalmente, iteramos por arriba de la cota inferior y por abajo de la cota super
 
           }
 ```
-### Complejidad según los accesos a memoria secundaria - Sequential File
-
-Tomar en cuenta que n son los elementos pertenecientes a DATA FILE.
-Además, k son los elementos pertenecientes a AUXILIAR FILE.
-
-| Operación | Explicación | Complejidad |
-|--------------|--------------|--------------|
-| **Insertion**  | O(log n)-> Busqueda Binaria en DATA + O(k) -> Busqueda secuencial en AUX, pero como k es log(n)    | O(log n )    |
-| **Search**  | O(log n)-> Busqueda Binaria en DATA + O(k) -> Busqueda secuencial en AUX, pero como k es log(n)   | O(log n)    |
-| **Range Search**  | O(n+k)-> Rebuild() + O(log n) -> Busqueda Binaria en DATA    | O(n)    |
-| **Remove**  | O(n+k)→Rebuild() + O(log n)→Busqueda binaria en DATA + O(k) → Busqueda lineal en AUX, k = log(n)   | O(n)   |
-| **Rebuild**  | O(n -> recorrido lineal al DATA + k -> recorrido lineal al AUX), como k = log n → O(n + log(n))   | O(n)   |
 
 ## Operaciones implementadas
 
@@ -1044,6 +1032,20 @@ Asimismo, implementaremos un **Parser con SQL** y un **GUI** con **QT** para la 
 - [AVL](https://github.com/anamariaaccilio/BD2_AVL)
 - [Extendible Hashing](https://github.com/anamariaaccilio/BD2_AVL)
 - [Sequential](https://github.com/anamariaaccilio/BD2_AVL)
+
+### Complejidad según los accesos a memoria secundaria - Sequential File
+
+n : Son los elementos pertenecientes a DATA FILE.
+k : Son los elementos pertenecientes a AUXILIAR FILE.
+
+| Operación | Explicación | Complejidad |
+|--------------|--------------|--------------|
+| **Insertion**  | O(log n)-> Busqueda Binaria en DATA + O(k) -> Busqueda secuencial en AUX, pero como k es log(n)    | O(log n )    |
+| **Search**  | O(log n)-> Busqueda Binaria en DATA + O(k) -> Busqueda secuencial en AUX, pero como k es log(n)   | O(log n)    |
+| **Range Search**  | O(n+k)-> Rebuild() + O(log n) -> Busqueda Binaria en DATA    | O(n)    |
+| **Remove**  | O(n+k)→Rebuild() + O(log n)→Busqueda binaria en DATA + O(k) → Busqueda lineal en AUX, k = log(n)   | O(n)   |
+| **Rebuild**  | O(n -> recorrido lineal al DATA + k -> recorrido lineal al AUX), como k = log n → O(n + log(n))   | O(n)   |
+
 
 ## SQL Parser
 
