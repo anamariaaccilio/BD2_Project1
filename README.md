@@ -726,23 +726,21 @@ SELECT * FROM NYC_Traffic WHERE street = 'BRUCKNER BOULEVARD';
 
 Técnicas de indexación de archivos sobre el dominio de datos.
 
-## Inserción
-
+### Tiempo de ejecución
 | #Registros | AVL File | Sequential File | Extendible Hashing |
 |--------------|--------------|--------------|--------------|
-| 100   | 70 ms    | Celda 1,3    | Celda 1,3    |
-| 1000    | 1702 ms   | Celda 2,3    | Celda 1,3    |
-| 10000    | 97575 ms    | Celda 3,3    | Celda 1,3    |
-| 100000    | 257345 ms   | Celda 3,3    | Celda 1,3    |
+| 100   | 68 ms    | Celda 1,3    | 529 ms    |
+| 1000    | 991 ms   | Celda 2,3    | 5355 ms    |
+| 10000    | 121139 ms    | Celda 3,3    | 53345 ms   |
+| 100000    | 146988 ms   | Celda 3,3    | 53424354 ms    |
 
 ## Busqueda
-
 | #Registros | AVL File | Sequential File | Extendible Hashing |
 |--------------|--------------|--------------|--------------|
-| 100   | 70 ms    | Celda 1,3    | Celda 1,3    |
-| 1000    | 1702 ms   | Celda 2,3    | Celda 1,3    |
-| 10000    | 97575 ms    | Celda 3,3    | Celda 1,3    |
-| 100000    | 257345 ms   | Celda 3,3    | Celda 1,3    |
+| 100   | 0.0134 ms    | Celda 1,3    | Celda 1,3    |
+| 1000    | 0.0159 ms   | Celda 2,3    | Celda 1,3    |
+| 10000    | 0.0184 ms    | Celda 3,3    | Celda 1,3    |
+| 100000    | 0.0204 ms   | Celda 3,3    | Celda 1,3    |
 
 
 # Interfaz gráfica
