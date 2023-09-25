@@ -1143,7 +1143,8 @@ La **GUI** fue diseñada en **QT**, ya que es un entorno de desarrollo integrado
 
 - Al utilizar índices se optimizó las consultas sobre el dataset que superan los 1000 0000 registros, puesto que la gestión de estructuras de indexación en memoría secundaria fueron más rápidas.
 - La creación del índice AVL fue mayor respecto al Hash, debido a que se realizan rotaciones en la inserción de cada nodo del AVL.
-- Al momento de utilizar una cantidad pequeña de registros, el Extendable Hashing es competente. Sin embargo, cuando utilizamos una mayor cantidad de registros, la estructura más eficiente es el AVL
+- Al momento de utilizar una cantidad pequeña de registros, el Extendable Hashing es competente. Sin embargo, cuando utilizamos una mayor cantidad de registros, la estructura más eficiente es el AVL.
+- El árbol AVL demostró ser eficaz para llevar a cabo búsquedas por rango y generar reportes ordenados, operaciones que no son admitidas por la tabla hash. Estos escenarios ilustran claramente situaciones en las que se prefiere una estructura que preserve un orden particular entre las claves, en contraposición a una tabla hash donde se pierde el orden de los atributos al indexarlos.
 
 # Referencias bibliográficas
 
