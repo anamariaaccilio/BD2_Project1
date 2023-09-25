@@ -1029,8 +1029,7 @@ Asimismo, implementaremos un **Parser con SQL** y un **GUI** con **QT** para la 
 
 ## Análisis Comparativo - Conceptual
 
-- [AVL](https://github.com/anamariaaccilio/BD2_AVL)
-
+- [AVL](https://github.com/anamariaaccilio/BD2_Project1/blob/main/GUI_Completo/AVL.h)
 ### Complejidad según los accesos a memoria secundaria - AVL File
 
 
@@ -1044,7 +1043,7 @@ k : Número de elementos dentro del rango
 | **Range Search**  | Recorre el árbol de manera descendente, explorando únicamente los nodos que contienen claves dentro del rango. Se aplica recursividad para limitar la exploración a los nodos esenciales en la búsqueda. | O(k + logn)    |
 | **Remove**  | Desciende hasta llegar al nodo que contiene la llave objetivo. Luego, selecciona el método de eliminación adecuado en función del estado actual del nodo, que a menudo implica realizar rotaciones para mantener la propiedad de árbol balanceado. | O(log n)   |
 
-- [Extendible Hashing](https://github.com/anamariaaccilio/BD2_AVL)
+- [Extendible Hashing](https://github.com/anamariaaccilio/BD2_Project1/blob/main/GUI_Completo/ExtendibleHash.h)
 
 ### Complejidad según los accesos a memoria secundaria - Extendible Hashing
 
@@ -1059,7 +1058,7 @@ D y FB son constantes, siempre tenemos el análisis de la siguiente forma:
 | **Build**    | Crea el archivo en funcion del D y FB, D para las secuencias de Bits y FB para inicializar los buckets.                 | O(1)           |
   
 
-- [Sequential](https://github.com/anamariaaccilio/BD2_AVL)
+- [Sequential](https://github.com/anamariaaccilio/BD2_Project1/blob/main/GUI_Completo/SequentialFile.h)
 
 ### Complejidad según los accesos a memoria secundaria - Sequential File
 
