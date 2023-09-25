@@ -718,6 +718,7 @@ La implementación del parser para consultas SQL se ha llevado a cabo siguiendo 
 
 # Interfaz gráfica
 La **GUI** fue diseñada en **QT**, ya que es un entorno de desarrollo integrado de fácil uso y más intutivo para los usuarios.
+![GUI](https://github.com/anamariaaccilio/BD2_Project1/blob/main/GUI.png)
 
 # Conclusiones
 
