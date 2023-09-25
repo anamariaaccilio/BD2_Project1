@@ -671,7 +671,7 @@ Finalmente, iteramos por arriba de la cota inferior y por abajo de la cota super
           }
 ```
 ### Complejidad según los accesos a memoria secundaria - Sequential File
-| #Operación | Explicación | Complejidad |
+| Operación | Explicación | Complejidad |
 |--------------|--------------|--------------|
 | **Insertion**  | O(log n)-> Busqueda Binaria en DATA + O(k) -> Busqueda secuencial en AUX, pero como k es log(n)    | O(log n )    |
 | **Search**  | O(log n)-> Busqueda Binaria en DATA + O(k) -> Busqueda secuencial en AUX, pero como k es log(n)   | O(log n)    |
