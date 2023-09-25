@@ -4,40 +4,39 @@
 #include <cstring>
 #include <string>
 #include <cmath>
+#include <chrono>
+#include <sstream>
 
 using namespace std;
 
 class Record {
+private:
 
 public:
     char id[8];
+    char district[15];
     int year;
     int month;
     int day;
-    int volume;
+    int vol;
     char street[30];
+
     float Puntero;
 
     void setData(){
-        cout<<"ID:";
+        cout<<"Nombre:";
         cin>>id;
-        cout<<"Street:";
-        cin>>street;
-        cout<<"Year:";
-        cin>>year;
+        cout<<"Apellidos:";
+        cin>>district;
     }
     void showData(){
-        cout<<id<<" - "<<street<<" - "<<year<<" - "<<Puntero<<endl;
+        cout<<id<<" - "<<district<<" - "<<street<<endl;
     }
-
 
     // Agregar un método para comparar el nombre de dos records
     int compare(const Record& otro) const {
         return strcmp(id, otro.id);
     }
-
-
-
 };
 
 class SequentialFile
@@ -69,7 +68,7 @@ public:
         if (!checkFile.is_open()) {
             // El archivo no existe, entonces lo creamos y escribimos el registro predeterminado
             Record defaultRecord;
-            strcpy(defaultRecord.id, "\0\0\0\0\0\0\0\0\0\0\0\0");
+            strcpy(defaultRecord.id, "\0\0\0\0\0\0\0\0");
             defaultRecord.Puntero = 0.1;
             writeRecordPOS(defaultRecord, 0, this->data_file);
         } else {
@@ -123,7 +122,6 @@ public:
 
     }
 
-    template <typename T>
     void add(Record record){
         //Ubicamos el elemento anterior a record
         int X_pos = binarySearchPosition(record) - 1; //binarySearchPOS me devuelve la pos donde debo insertar el elemento, por eso el -1
@@ -214,7 +212,7 @@ public:
                     aux_size += 1;
                 }
 
-                    //Ahora si tanto X como Y pertenecen a auxiliar file
+                //Ahora si tanto X como Y pertenecen a auxiliar file
                 else {
                     bool posicionado = false;
                     int cmp2;
@@ -304,8 +302,7 @@ public:
 
     }
 
-    template <class T>
-    bool remove_(T key){
+    bool remove_(const string& key){
 
         //DATA FILE
         rebuild();
@@ -324,7 +321,7 @@ public:
         else{
             key_pos -= 1; //Pos real del key encontrado
             Record current = readRecord(key_pos, data_file);
-            if (current.id != key){
+            if (current.id!= key){
                 throw runtime_error("No se encontró la key");
             }
 
@@ -370,8 +367,7 @@ public:
          */
     };
 
-    template <typename T>
-    vector<Record> search(const T& key){
+    vector<Record> search(const string& key){
 
         //DATAFILE
 
@@ -382,13 +378,13 @@ public:
         // Busco con búsqueda binaria el key_pos
         int key_pos = binarySearchPosition(encontrar);
         if (key_pos == 0){
-            throw runtime_error("No se encontró la key 1");
+            throw runtime_error("No se encontró la key");
         }
         else {
             key_pos -= 1; //Pos real del key encontrado
             Record current = readRecord(key_pos, data_file);
-            if (strcmp(current.id, key.c_str()) != 0){
-                throw runtime_error("No se encontró la key 2");
+            if (current.id != key.c_str()){
+                throw runtime_error("No se encontró la key");
             }
 
             vector<Record> result;
@@ -450,8 +446,7 @@ public:
 
     }
 
-    template <typename T>
-    vector<Record> rangeSearch(const T& begin, const T& end) {
+    vector<Record> rangeSearch(const string& begin, const string& end) {
         rebuild();
 
         //Busco con busqueda binaria la posicion del begin
@@ -465,7 +460,7 @@ public:
         else {
             limite_inferior -= 1;
             Record inf = readRecord(limite_inferior, this->data_file);
-            if (strcmp(inf.id, begin.c_str()) != 0){
+            if (inf.id != begin){
                 throw runtime_error("No se encontró la key inferior");
             }
         }
@@ -480,7 +475,7 @@ public:
         else {
             limite_superior -= 1;
             Record sup = readRecord(limite_superior, this->data_file);
-            if (strcmp(sup.id, end.c_str()) != 0){
+            if (sup.id != end){
                 throw runtime_error("No se encontró la key superior");
             }
         }
@@ -619,7 +614,6 @@ private:
 
     //Binary Search Position me devuelve la posicion donde tiene que ser insertado cierto registro
     //Si en data_file existe A (ubicado en pos 0), y quiero insertar B, entonces binary me devuelve pos 1 (pos 0 + 1), ya que A esta despues que B.
-
     int binarySearchPosition(const Record& nuevoRecord) {
 
         /*
@@ -789,11 +783,85 @@ private:
 
 int main()
 {
+    SequentialFile file1; // Debes tener una instancia de tu SequentialFile
+
+    ifstream csvFile("NYC_Traffic.csv");
+
+    if (!csvFile.is_open()) {
+        cerr << "Error al abrir el archivo CSV." << endl;
+        return 1;
+    }
+
+    string line;
+    getline(csvFile, line); // Lee la primera línea que contiene los nombres de las columnas
+
+    int numRowsToInsert = 10000; // Cambia esta variable para controlar la cantidad de filas a insertar
+
+    auto start_time = chrono::high_resolution_clock::now(); // Registra el tiempo de inicio
+
+    for (int i = 0; i < numRowsToInsert && getline(csvFile, line); ++i) {
+        istringstream ss(line);
+        Record record;
+
+        // Parsea la línea CSV en los campos de tu estructura Record
+        string field;
+        getline(ss, field, ',');
+        strncpy(record.id, field.c_str(), sizeof(record.id));
+
+        getline(ss, field, ',');
+        strncpy(record.district, field.c_str(), sizeof(record.district));
+
+        getline(ss, field, ',');
+        record.year = stoi(field);
+
+        getline(ss, field, ',');
+        record.month = stoi(field);
+
+        getline(ss, field, ',');
+        record.day = stoi(field);
+
+        getline(ss, field, ',');
+        record.vol = stoi(field);
+
+        getline(ss, field, ',');
+        strncpy(record.street, field.c_str(), sizeof(record.street));
+
+        // Agrega el registro a tu SequentialFile
+        file1.add(record);
+
+        SequentialFile file8;
+        file8.print();
+    }
+
+    auto end_time = chrono::high_resolution_clock::now(); // Registra el tiempo de finalización
+    auto duration = chrono::duration_cast<chrono::milliseconds>(end_time - start_time); // Calcula la duración en milisegundos
+
+    csvFile.close();
+
+    // Muestra el tiempo de ejecución
+    cout << "Tiempo de ejecución: " << duration.count() << " ms" << endl;
+
+
+    auto start_time_search = chrono::high_resolution_clock::now(); // Registra el tiempo de inicio de la búsqueda
+
+    vector<Record> resultados = file1.search("23864");
+
+    auto end_time_search = chrono::high_resolution_clock::now(); // Registra el tiempo de finalización de la búsqueda
+    auto duration_search = chrono::duration_cast<chrono::milliseconds>(end_time_search - start_time_search); // Calcula la duración de la búsqueda en milisegundos
+
+    // Recorrer el vector e imprimir los resultados
+    for (Record r : resultados) {
+        r.showData();
+    }
+
+    cout << "Tiempo de búsqueda: " << duration_search.count() << " ms" << endl;
+
+
     //Add
-    SequentialFile file1;
+    /*SequentialFile file1;
     Record record;
     record.setData();
-    file1.add<string>(record);
+    file1.add(record);*/
 
     //Remove
     /*
@@ -802,25 +870,26 @@ int main()
     */
 
     //Print
-    SequentialFile file8;
-    file8.print();
+    /*SequentialFile file8;
+    file8.print();*/
 
 
-    cout << "-------------------------" <<endl;
+    //cout << "-------------------------" <<endl;
 
     //Search
+    /*
     SequentialFile file10;
-    /*vector<Record> resultados = file10.search<string>("ds");
+    vector<Record> resultados = file10.search("Azteca");
     // Recorrer el vector e imprimir los resultados
     for(Record r : resultados){
         r.showData();
     }*/
 
     //Range Search
-    SequentialFile file7;
-    vector<Record> resultados2 = file7.rangeSearch<string>("55","ds");
+    /*SequentialFile file7;
+    vector<Record> resultados = file7.rangeSearch("Mortina","Azteca");
     // Recorrer el vector e imprimir los resultados
-    for(Record r : resultados2){
+    for(Record r : resultados){
         r.showData();
-    }
+    }*/
 }
