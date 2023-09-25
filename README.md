@@ -733,7 +733,6 @@ Técnicas de indexación de archivos sobre el dominio de datos.
 | 1000    | 991 ms   | Celda 2,3    | 5355 ms    |
 | 10000    | 121139 ms    | Celda 3,3    | 53345 ms   |
 | 100000    | 146988 ms   | Celda 3,3    | 53424354 ms    |
-
 ## Busqueda
 | #Registros | AVL File | Sequential File | Extendible Hashing |
 |--------------|--------------|--------------|--------------|
