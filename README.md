@@ -108,6 +108,351 @@ Se busca obtener una optimización significativa de los tiempos de inserción y 
 Las estructuras que implementaremos son: `Extendible hashing` , `AVL` , `Sequential File`.
 
 ### Extendible Hashing
+Esta tecnica de Extendible hashing consta de 3 archivos para su correcto funcionamiento. El archivo Index contiene una tabla hash en la cual se encuentra los punteros de ubicacion a los buckets del archivo datafile. En el archivo datafile tenemos los datos agrupados unifomemente en buckets, cada bucket guarda la información de su tamaño, su capacidad y los datos. El archivo metadata simpleamente es un archivo que contiene la ubicación de los buckets borrados para aplicar una tecnica freelist tipo LIFO (Last In First Out). 
+Esta tecnica tiene ventajas ya que puede particionar partes de la data en buckets para trabajarla en RAM, tambien tiene accesos en funcion a su D que es la profundidad de la tabla y a su FB que es el factor de bloque del Bucket.
+
+- *Métodos importantes*
+1. inicializar: Esta implementación de ExtendibleHash tiene ciertas particularidades para ser mas efectiva, crea incialemte todos los posibles bits en funcion a D, esta operacion tiene un costo de 2^D pero solo se realiza una vez aligerando las complejidades del insert, search y remove.
+en funcion a los sufijos que se obtienen con la profundidad global, estos apuntan a los buckets y conforme el archivo va creciendo este se va extendiendo cambiando de puntero a los nuevos buckets 
+ ```cpp
+ void initialize() {
+        ifstream dataFile(datafile, ios::binary);
+        ifstream indexFile(indexfile, ios::binary);
+        ifstream meta(metadatafile, ios::binary);
+
+
+        if (!dataFile.is_open() || !indexFile.is_open()) {
+            globalDepth = 1; // Inicialmente, solo hay un bit de profundidad global
+            // Los archivos no existen, así que crea los archivos y buckets iniciales
+            ofstream newDataFile(datafile, ios::binary | ios::out | ios::app);
+            ofstream newIndexFile(indexfile, ios::binary | ios::out | ios::app);
+            ofstream newmetadataFile(metadatafile, ios::binary | ios::out);
+            int freelist = -1;
+            newmetadataFile.write(reinterpret_cast<const char*>(&freelist), sizeof(int));
+            newmetadataFile.close();
+            // Crea y escribe los buckets iniciales en el archivo de datos
+            for (int i = 0; i < 2; ++i) {
+                Bucket bucket(FB);// Serializa el bucket y escríbelo en el archivo de datos
+                bucket.serialize(newDataFile);
+            }
+
+            // Cierra los archivos recién creados
+            newDataFile.close();
+            // Inicializa la estructura de índice con todas las combinaciones posibles de bits
+            vector<string> binarios;
+            generarBinarios(D, "", binarios);
+
+            for (int i = 0; i < binarios.size(); ++i) {
+                IndexEntry entry(D); // Usa D para inicializar la cadena de bits
+                entry.bits = hashing(i); // Usa la nueva función de hash
+
+                // Ajustar la posición en consecuencia
+                if (i ==0 || i % 2 == 0){
+                    entry.local_index = 0;
+                    posBuckets[entry.bits] = entry.local_index;
+                    index.push_back(entry);
+                } else{
+                    Bucket temp(FB);
+                    entry.local_index = temp.sizeInBits();
+                    posBuckets[entry.bits] = entry.local_index;
+                    index.push_back(entry);
+                }
+            }
+
+            // Escribe el número de entradas de índice en el archivo de índice (metadatos)
+            int numEntries = binarios.size();
+            newIndexFile.write(reinterpret_cast<const char*>(&numEntries), sizeof(int));
+
+            // Escribe la profundidad global en el archivo índice (metadatos)
+            newIndexFile.write(reinterpret_cast<const char*>(&globalDepth), sizeof(int));
+
+            // Escribe la estructura de índice en el archivo de índice
+            newIndexFile.seekp(sizeof(int)+ sizeof(int));
+            for (IndexEntry entry : index) {
+                entry.serialize(newIndexFile);
+            }
+
+            newIndexFile.close();
+        } else {
+            // Los archivos existen, así que leemos los datos y el índice
+
+            // Leer el número de entradas de índice en el archivo de índice (metadatos)
+            int numEntries;
+            indexFile.read(reinterpret_cast<char*>(&numEntries), sizeof(int));
+
+            // Leer la estructura de índice desde el archivo de índice
+            index.clear();
+            indexFile.seekg(sizeof(int));
+            indexFile.read(reinterpret_cast<char*>(&globalDepth), sizeof(int));
+            indexFile.seekg(sizeof(int) + sizeof(int));
+            for (int i = 0; i < numEntries; ++i) {
+                IndexEntry entry(D); // Usa D para inicializar la cadena de bits
+                entry.deserialize(indexFile,D);
+                index.push_back(entry);
+            }
+            for (auto i : index){
+                posBuckets[i.bits] = i.local_index;
+            }
+
+            // Cerrar los archivos después de leer los datos
+            dataFile.close();
+            indexFile.close();
+        }
+        dataFile.close();
+        indexFile.close();
+    }
+```
+2. Insert: Este usando el hash que se construye en RAM, accede a la posicion del bucket, lo construye en memoria y usando el size inserta el elemento en el vector en complejidad constante. Cuando se tiene que redimencionar su complejidad  es O(FB/2)+C ya que este al dividir los buckets en 2 nuevos más la Constante de reapuntar el Index  y actualizar las estructuras de RAM. 
+
+ ```cpp
+ bool insert(const Record& record) {
+        // Obtener la cadena de bits hash para la clave del registro
+        string hashBits = hashing(record.key);
+
+        // Buscar la entrada de índice correspondiente
+        if (posBuckets.find(hashBits) != posBuckets.end()) {
+            int bucketPos = posBuckets[hashBits];
+
+            // Abrir el archivo de datos en modo lectura/escritura
+            fstream dataFileStream(datafile, ios::binary | ios::in | ios::out);
+
+            // Ir a la posición del bucket en el archivo de datos
+            dataFileStream.seekg(bucketPos);
+
+            // Leer el bucket existente desde el archivo
+            Bucket existingBucket(FB);
+            existingBucket.deserialize(dataFileStream);
+
+            // Comprobar si el bucket tiene espacio para más registros
+            if (existingBucket.size < existingBucket.capacidad) {
+                // Insertar el nuevo registro en el bucket
+                existingBucket.records[existingBucket.size] = record;
+                existingBucket.size++;
+
+                // Actualizar el bucket en el archivo de datos
+                dataFileStream.seekp(bucketPos);
+                existingBucket.serialize(dataFileStream);
+
+                // Cerrar el archivo de datos
+                dataFileStream.close();
+
+                // La inserción fue exitosa
+                return true;
+            }else {
+                // El bucket está lleno, se requiere dividir
+
+                // Aumentar la globalDepth
+                globalDepth++;
+
+                // Crear los nuevos buckets
+                Bucket newBucket1(FB), newBucket2(FB);
+                for (int i = 0; i < existingBucket.size; ++i) {
+                    // Poner la mitad de los datos en el nuevo bucket
+                    if (i % 2 == 0) {
+                        newBucket1.insert(existingBucket.records[i]);
+                    } else {
+                        newBucket2.insert(existingBucket.records[i]);
+                    }
+                }
+
+                // Guardar el nuevo bucket en el archivo de datos
+                fstream meta(metadatafile, ios::binary | ios::in | ios::out);
+                int metadataPos;
+                meta.seekp(-sizeof(int), std::ios::end); // Retrocede 1 int desde el final
+                meta.read(reinterpret_cast<char *>(&metadataPos), sizeof(int));
+                if (metadataPos != -1) {
+                    // Guardar el nuevo bucket en la posición calculada y el original en la posicion anterior
+                    dataFileStream.seekp(bucketPos);
+                    newBucket1.serialize(dataFileStream);
+                    dataFileStream.seekp(metadataPos);
+                    newBucket2.serialize(dataFileStream);
+                } else {
+                    dataFileStream.seekp(0, std::ios::end);
+                    newBucket2.serialize(dataFileStream);
+                    dataFileStream.seekp(bucketPos);
+                    newBucket1.serialize(dataFileStream);
+                }
+
+                // Crear un índice temporal y un mapa temporal
+                vector<IndexEntry> indexTemp = index;
+                unordered_map<string, int> posBucketsTemp = posBuckets;
+
+                // Actualizar las entradas de índice temporal para apuntar al nuevo bucket
+                int newBucketPos = dataFileStream.tellg();
+                for (auto &entry : indexTemp) {
+                    if (entry.local_index == bucketPos) {
+                        entry.local_index = newBucketPos;
+                    }
+                }
+
+                // Actualizar el mapa temporal PosBucketsTemp
+                posBucketsTemp[hashBits] = newBucketPos;
+
+                // Actualizar el archivo de índice temporal
+                ofstream newIndexFile(indexfile, ios::binary | ios::out | ios::app);
+                newIndexFile.seekp(sizeof(int) + sizeof(int));
+                for (IndexEntry entry : indexTemp) {
+                    entry.serialize(newIndexFile);
+                }
+
+                for (const auto& entry : indexTemp) {
+                    updateIndexElement(entry.bits, entry.local_index);
+                }
+
+                // Actualizar posBuckets elemento por elemento
+                for (const auto& pair : posBucketsTemp) {
+                    updatePosBucketElement(pair.first, pair.second);
+                }
+
+
+                // Cerrar el archivo de datos
+                dataFileStream.close();
+
+                // Intentar insertar el registro nuevamente en los nuevos buckets
+                return insert(record);
+            }
+        }  else{
+            cout<<"posicion invalida"<<endl;
+            return false;
+        }
+
+    }
+```
+3. search: Este simplemente busca usando el hash para acceder en complejidad constante al bucket y de ahi itera hasta llegar al elemento, esa parte es constante donde su complejidad es O(FB)+C ya que FB es el peor caso de busqueda
+ ```cpp
+Record search(int key) {
+        // Obtener la cadena de bits hash para la clave
+        string hashBits = hashing(key);
+
+        // Buscar la entrada de índice correspondiente
+        if (posBuckets.find(hashBits) != posBuckets.end()) {
+            int bucketPos = posBuckets[hashBits];
+
+            // Abrir el archivo de datos en modo lectura
+            ifstream dataFileStream(datafile, ios::binary);
+
+            // Ir a la posición del bucket en el archivo de datos
+            dataFileStream.seekg(bucketPos);
+
+            // Leer el bucket desde el archivo
+            Bucket existingBucket(FB);
+            existingBucket.deserialize(dataFileStream);
+
+            // Buscar el registro en el bucket
+            for (const Record& record : existingBucket.records) {
+                if (record.key == key) {
+                    // Cerrar el archivo de datos
+                    dataFileStream.close();
+
+                    // Devolver el registro encontrado
+                    return record;
+                }
+            }
+
+            // Cerrar el archivo de datos
+            dataFileStream.close();
+        }
+
+        // Si no se encuentra el registro, devuelve un registro con clave -1
+        Record notFoundRecord;
+        notFoundRecord.key = -1;
+        return notFoundRecord;
+    }
+ ```
+ 4. Remove: Este busca el elemento a eliminar y al encontrarlo lo cambia a los valores de eliminado. En caso el Bucket quede vacio se manda su ubicación a la freelist. Por lo que su complejidad en el peor de los casos es O(FB)+C donde la Constante es las operaciones que se realizan al eliminar el  buket.
+  ```cpp
+  Record remove(int key) {
+        // Obtener la cadena de bits hash para la clave
+        string hashBits = hashing(key);
+
+        // Buscar la entrada de índice correspondiente
+        if (posBuckets.find(hashBits) != posBuckets.end()) {
+            int bucketPos = posBuckets[hashBits];
+
+            // Abrir el archivo de datos en modo lectura/escritura
+            fstream dataFileStream(datafile, ios::binary | ios::in | ios::out);
+
+            // Ir a la posición del bucket en el archivo de datos
+            dataFileStream.seekg(bucketPos);
+
+            // Leer el bucket desde el archivo
+            Bucket existingBucket(FB);
+            existingBucket.deserialize(dataFileStream);
+
+            // Buscar el registro en el bucket
+            for (int i = 0; i < existingBucket.size; ++i) {
+                if (existingBucket.records[i].key == key) {
+                    // Marcar la clave como -1 y los datos como nulos
+                    existingBucket.records[i].key = -1;
+                    memset(existingBucket.records[i].data, 0, sizeof(existingBucket.records[i].data));
+                    existingBucket.size--;
+
+                    // Actualizar el bucket en el archivo de datos
+                    dataFileStream.seekp(bucketPos);
+                    existingBucket.serialize(dataFileStream);
+
+                    // Cerrar el archivo de datos
+                    dataFileStream.close();
+
+                    // Verificar si el bucket está vacío
+                    if (existingBucket.size == 0) {
+                        Bucket temp(FB);
+                        int temp_ = temp.sizeInBits();
+                        // Comprobar que no sean buckets raíz
+                        if (bucketPos != 0 && bucketPos != temp_) {
+                            // Agregar la posición del bucket eliminado a la freelist en el archivo de metadatos
+                            fstream meta(metadatafile, ios::binary | ios::in | ios::out);
+                            meta.seekp(0, std::ios::end);
+                            meta.write(reinterpret_cast<char*>(&bucketPos), sizeof(int));
+                            meta.close();
+
+                            // Buscar otras entradas de índice que apunten al bucket eliminado
+                            for (auto& entry : index) {
+                                if (entry.local_index == bucketPos) {
+                                    // Buscar el sufijo de la entrada de índice
+                                    string suffix = entry.bits.substr(globalDepth - D);
+
+                                    // Buscar una entrada de índice que tenga el mismo sufijo
+                                    for (auto& otherEntry : index) {
+                                        if (otherEntry.local_index != bucketPos &&
+                                            otherEntry.bits.substr(globalDepth - D) == suffix) {
+                                            // Redirigir la entrada de índice al bucket anterior
+                                            entry.local_index = otherEntry.local_index;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Actualizar el map PosBuckets
+                            for (auto i : index){
+                                posBuckets[i.bits] = i.local_index;
+                            }
+
+                            // Actualizar el archivo de índice
+                            ofstream newIndexFile(indexfile, ios::binary | ios::out | ios::app);
+                            newIndexFile.seekp(sizeof(int) + sizeof(int));
+                            for (IndexEntry entry : index) {
+                                entry.serialize(newIndexFile);
+                            }
+                        } else {
+                            cout << "No se actualizó la freelist ya que es un bucket raíz" << endl;
+                        }
+                    }
+
+                    return existingBucket.records[i];
+                }
+            }
+
+            // Cerrar el archivo de datos
+            dataFileStream.close();
+        }
+        // Si no se encuentra el registro, devuelve un registro con clave -1
+        Record notFoundRecord;
+        notFoundRecord.key = -1;
+        return notFoundRecord;
+    }
+   ```
 
 ### AVL File Organization
 La técnica de organización de archivos AVL File se basa en la utilización de árboles AVL para almacenar registros de manera ordenada y balanceada en un archivo, basada en la estructura de árboles AVL (árbol binario de búsqueda) en la que se garantiza que la diferencia de alturas entre los subárboles izquierdo y derecho de cada nodo (conocida como el factor de equilibrio) no excede más de uno. Esto asegura que el árbol esté siempre balanceado, lo que, a su vez, garantiza que las operaciones de búsqueda, inserción y eliminación sean eficientes con un tiempo de ejecución en el peor caso de O(log n), donde "n" es el número de nodos en el árbol.
