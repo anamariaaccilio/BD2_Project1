@@ -40,6 +40,7 @@
     <li><a href="#Resultados-experimentales">Resultados experimentales</a></li>
     <li><a href="#Gráfico-Comprativo">Gráfico comparativo de las técnicas de indexación</a></li>
     <li><a href="#Interfaz-gráfica">Interfaz gráfica</a></li>
+   <li><a href="#Funcionalidad-del-aplicativo"></a>Funcionalidad del aplicativo</li>
     <li><a href="#conclusiones">Conclusiones</a></li>
     <li><a href="#Team-group5">Team - Group 5</a></li>
     <li><a href="#referencias-bibliográficas">Referencias bibliográficas</a></li>
@@ -748,6 +749,10 @@ Técnicas de indexación de archivos sobre el dominio de datos.
 La **GUI** fue diseñada en **QT**, ya que es un entorno de desarrollo integrado de fácil uso y más intutivo para los usuarios.
 
 ![GUI](GUI.png)
+
+# Funcionalidad del aplicativo
+
+[Vídeo de Funcionalidades](https://drive.google.com/drive/folders/1ECW-VbkkPhD6DLNrTLTGrhOZQxUz0uzO?usp=sharing)
 
 # Conclusiones
 
