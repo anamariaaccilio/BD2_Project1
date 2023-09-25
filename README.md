@@ -1016,6 +1016,10 @@ Finalmente, iteramos por arriba de la cota inferior y por abajo de la cota super
           }
 ```
 ### Complejidad según los accesos a memoria secundaria - Sequential File
+
+Tomar en cuenta que n son los elementos pertenecientes a DATA FILE.
+Además, k son los elementos pertenecientes a AUXILIAR FILE.
+
 | Operación | Explicación | Complejidad |
 |--------------|--------------|--------------|
 | **Insertion**  | O(log n)-> Busqueda Binaria en DATA + O(k) -> Busqueda secuencial en AUX, pero como k es log(n)    | O(log n )    |
